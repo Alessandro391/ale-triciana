@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ale Triciana – Pizzeria romana a Ciampino</title>
+<meta name="description" content="Pizzeria a Ciampino: carbonara, amatriciana, gricia e cacio e pepe su pizza. Prenota un tavolo online.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js");</script>
+<style>
+  :root {
+    color-scheme: light;
+    --pomodoro: #B3261E;
+    --pomodoro-scuro: #8E1B14;
+    --tuorlo: #F2B53A;
+    --crosta: #C98A45;
+
+    --bg: #FFFDF8;
+    --text: #2A2421;
+    --text-soft: #5E534D;
+    --surface: #FFFFFF;
+    --surface-alt: #F6ECCF;
+    --line: #E4D9C4;
+    --hero-bg: #B3261E;
+    --hero-text: #FFF7EC;
+    --btn-bg: #B3261E;
+    --btn-text: #FFFFFF;
+    --focus: #F2B53A;
+    --warn: #B3261E;
+    --ok: #2E7D4F;
+
+    --font-display: "Alfa Slab One", "Rockwell", "Roboto Slab", Georgia, serif;
+    --font-body: "Work Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --ease: cubic-bezier(.2,.8,.2,1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #221D1A;
+      --text: #F3EBDD;
+      --text-soft: #C9BCAE;
+      --surface: #2E2724;
+      --surface-alt: #382E28;
+      --line: #4A3F39;
+      --hero-bg: #9E2219;
+      --btn-bg: #D2382E;
+      --warn: #F07A70;
+      --ok: #7FD1A0;
+    }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--font-body); font-size: 1.0625rem; line-height: 1.55;
+  }
+  img, svg { max-width: 100%; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  .wrap { width: min(1080px, 100% - 2.5rem); margin-inline: auto; }
+
+  /* ---------- Bottoni ---------- */
+  .btn {
+    position: relative; overflow: hidden; isolation: isolate;
+    display: inline-block; border: 0; cursor: pointer;
+    font: 600 1rem/1 var(--font-body);
+    padding: 1rem 1.5rem; border-radius: 999px; text-decoration: none;
+    transition: transform .2s var(--ease), box-shadow .2s var(--ease), filter .2s;
+  }
+  .btn::after {
+    content: ""; position: absolute; z-index: -1; top: 0; left: -70%; width: 45%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
+    transform: skewX(-20deg); transition: left .65s var(--ease);
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.2); }
+  .btn:hover::after { left: 135%; }
+  .btn:active { transform: translateY(0) scale(.98); }
+  .btn:disabled { opacity: .6; cursor: wait; }
+  .btn-light { background: var(--hero-text); color: var(--pomodoro); }
+  .btn-ghost { background: transparent; color: var(--hero-text); box-shadow: inset 0 0 0 2px var(--hero-text); }
+  .btn-ghost:hover { background: rgba(255,255,255,.12); box-shadow: inset 0 0 0 2px var(--hero-text), 0 10px 22px rgba(0,0,0,.2); }
+  .btn-main { background: var(--btn-bg); color: var(--btn-text); }
+
+  /* ---------- Hero ---------- */
+  .hero { position: relative; overflow: hidden; background: var(--hero-bg); color: var(--hero-text); }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(520px circle at var(--mx, 75%) var(--my, 45%), rgba(255,214,150,.22), transparent 65%);
+    transition: background .1s;
+  }
+  .trail { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .fleck {
+    position: absolute; width: var(--s); height: calc(var(--s) * .7);
+    border-radius: 40%; background: var(--c);
+    animation: cade .95s ease-in forwards;
+  }
+  @keyframes cade {
+    from { transform: translate(-50%, -50%) rotate(0); opacity: .95; }
+    to   { transform: translate(calc(-50% + var(--dx)), calc(-50% + 52px)) rotate(var(--r)); opacity: 0; }
+  }
+  .hero .wrap { position: relative; z-index: 1; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.1rem; }
+  .logo { font-family: var(--font-display); font-size: 1.45rem; text-decoration: none; letter-spacing: .01em; transition: letter-spacing .3s var(--ease); }
+  .logo:hover { letter-spacing: .05em; }
+  .nav { display: flex; gap: 1.4rem; align-items: center; }
+  .nav a { text-decoration: none; font-weight: 500; }
+  .nav a:not(.nav-cta) {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 2px no-repeat;
+    padding-bottom: 3px; transition: background-size .3s var(--ease);
+  }
+  .nav a:not(.nav-cta):hover { background-size: 100% 2px; }
+  .nav .nav-cta {
+    background: var(--hero-text); color: var(--pomodoro);
+    padding: .55rem 1rem; border-radius: 999px; font-weight: 600;
+    transition: transform .2s var(--ease), box-shadow .2s;
+  }
+  .nav .nav-cta:hover { transform: translateY(-2px) rotate(-2deg); box-shadow: 0 8px 18px rgba(0,0,0,.25); }
+
+  .hero-grid {
+    display: grid; grid-template-columns: 1.05fr .95fr;
+    gap: 3rem; align-items: center; padding-block: 3rem 5rem;
+  }
+  .hero h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(2.6rem, 6vw, 4.6rem); line-height: 1.02; margin: 0 0 1.2rem;
+  }
+  .hero p.lead { font-size: 1.2rem; max-width: 34ch; margin: 0 0 2rem; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; }
+  .hero-hint { margin: 1.4rem 0 0; font-size: .9rem; opacity: .8; }
+
+  /* ---------- Le quattro pizze ---------- */
+  .pizzas { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.6rem; }
+  .pz {
+    display: block; width: 100%; background: none; border: 0; padding: 0;
+    color: inherit; font: inherit; text-align: center; cursor: pointer;
+  }
+  .pz:nth-child(even) { margin-top: 2rem; }
+  .pz-plate {
+    position: relative;
+    transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--ty, 0px));
+    transition: transform .25s ease-out;
+  }
+  .pz:hover .pz-plate, .pz:focus-visible .pz-plate { --ty: -10px; }
+  .pz-plate::after {
+    content: ""; position: absolute; inset: 3%; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle at var(--gx, 30%) var(--gy, 25%), rgba(255,255,255,.35), transparent 45%);
+    opacity: 0; transition: opacity .3s; mix-blend-mode: soft-light;
+  }
+  .pz:hover .pz-plate::after { opacity: 1; }
+  .pz-svg {
+    display: block; width: 100%; height: auto;
+    filter: drop-shadow(0 12px 10px rgba(0,0,0,.35));
+    transition: transform 1.4s var(--ease), filter .35s;
+  }
+  .pz:hover .pz-svg, .pz:focus-visible .pz-svg { transform: rotate(32deg) scale(1.05); filter: drop-shadow(0 24px 18px rgba(0,0,0,.42)); }
+  .pz-name { display: block; font-family: var(--font-display); font-size: 1.1rem; margin-top: .55rem; transition: transform .25s var(--ease); }
+  .pz:hover .pz-name { transform: scale(1.06); }
+  .pz-tip {
+    display: block; font-size: .84rem; line-height: 1.35; max-width: 22ch; margin: .25rem auto 0;
+    opacity: 0; transform: translateY(-6px); transition: opacity .25s, transform .25s var(--ease);
+  }
+  .pz:hover .pz-tip, .pz:focus-visible .pz-tip { opacity: .92; transform: none; }
+
+  .steam { position: absolute; inset: 0; pointer-events: none; }
+  .steam span {
+    position: absolute; bottom: 55%; width: 14%; height: 40%; border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,.55), transparent 70%);
+    filter: blur(6px); opacity: 0;
+  }
+  .steam span:nth-child(1) { left: 28%; }
+  .steam span:nth-child(2) { left: 44%; }
+  .steam span:nth-child(3) { left: 60%; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pz-in { animation: arriva .8s cubic-bezier(.2,.8,.2,1.2) both; }
+    .pz:nth-child(2) .pz-in { animation-delay: .12s; }
+    .pz:nth-child(3) .pz-in { animation-delay: .24s; }
+    .pz:nth-child(4) .pz-in { animation-delay: .36s; }
+    @keyframes arriva { from { transform: scale(.55) rotate(-60deg); opacity: 0; } }
+    .pz:hover .steam span { animation: vapore 2.2s ease-out infinite; }
+    .pz:hover .steam span:nth-child(2) { animation-delay: .5s; }
+    .pz:hover .steam span:nth-child(3) { animation-delay: 1s; }
+    @keyframes vapore {
+      0% { transform: translateY(20%) scaleX(.6); opacity: 0; }
+      30% { opacity: .9; }
+      100% { transform: translateY(-70%) scaleX(1.4); opacity: 0; }
+    }
+  }
+
+  /* Anteprima pizza che segue il mouse nel menu */
+  .float-pizza {
+    position: fixed; left: 0; top: 0; z-index: 30; width: 150px; pointer-events: none;
+    opacity: 0; transform: translate(var(--fx, -999px), var(--fy, -999px)) scale(.6) rotate(-20deg);
+    transition: opacity .2s, transform .18s ease-out;
+  }
+  .float-pizza.show { opacity: 1; transform: translate(var(--fx), var(--fy)) scale(1) rotate(0); }
+  .float-pizza svg { width: 100%; height: auto; filter: drop-shadow(0 14px 14px rgba(0,0,0,.35)); }
+
+  /* ---------- Sezioni ---------- */
+  section { padding-block: 4.5rem; }
+  h2 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.1; margin: 0 0 .6rem;
+  }
+  .intro { color: var(--text-soft); max-width: 60ch; margin: 0 0 2.5rem; }
+
+  html.js .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+  html.js .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { html.js .reveal { opacity: 1; transform: none; transition: none; } }
+
+  /* Menu */
+  .menu-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem 4rem; }
+  .menu-block h3 {
+    font-family: var(--font-display); font-weight: 400; font-size: 1.35rem;
+    margin: 0 0 1rem; padding-bottom: .4rem; display: inline-block;
+    background: linear-gradient(var(--pomodoro), var(--pomodoro)) 0 100% / 45% 3px no-repeat;
+    transition: background-size .4s var(--ease);
+  }
+  .menu-block:hover h3 { background-size: 100% 3px; }
+  .menu-block + .menu-block { margin-top: 2.5rem; }
+  .item {
+    position: relative; isolation: isolate;
+    padding: .5rem .8rem; margin: 0 -.8rem .35rem; border-radius: 12px;
+  }
+  .item::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
+    background: var(--surface-alt);
+    transform: scaleX(0); transform-origin: left; transition: transform .35s var(--ease);
+  }
+  .item:hover::before { transform: scaleX(1); }
+  .item-row { display: flex; align-items: baseline; gap: .6rem; font-weight: 600; }
+  .item-row .dots { flex: 1; border-bottom: 2px dotted var(--line); transform: translateY(-4px); transition: border-color .25s; }
+  .item:hover .dots { border-color: var(--pomodoro); }
+  .price { display: inline-block; transition: transform .25s var(--ease), color .25s; }
+  .item:hover .price { color: var(--warn); transform: scale(1.1); }
+  .item p { margin: .2rem 0 0; color: var(--text-soft); font-size: .97rem; max-width: 52ch; }
+  .romane .item-row { font-size: 1.15rem; }
+  .romane .item { cursor: zoom-in; }
+  .item.flash::before { animation: flash 1.6s var(--ease); }
+  @keyframes flash {
+    0%, 60% { transform: scaleX(1); background: var(--tuorlo); }
+    100% { transform: scaleX(0); }
+  }
+
+  /* Orari */
+  .info { background: var(--surface-alt); }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+  .badge {
+    display: inline-flex; align-items: center; gap: .5rem; margin: 0 0 1rem;
+    padding: .35rem .8rem; border-radius: 999px; font-size: .9rem; font-weight: 600;
+    background: var(--surface); border: 1px solid var(--line);
+  }
+  .badge i { width: .6rem; height: .6rem; border-radius: 50%; background: var(--warn); }
+  .badge.open i { background: var(--ok); box-shadow: 0 0 0 0 var(--ok); animation: pulse 1.8s infinite; }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 8px transparent; } }
+  .hours { width: 100%; border-collapse: collapse; }
+  .hours td { padding: .6rem .5rem; border-bottom: 1px solid var(--line); transition: background .2s, padding .2s; }
+  .hours tr:hover td { background: var(--surface); }
+  .hours tr:hover td:first-child { padding-left: .9rem; }
+  .hours td:last-child { text-align: right; font-weight: 500; }
+  .hours tr.closed td:last-child { color: var(--warn); }
+  .hours tr.today td { font-weight: 700; }
+  .hours tr.today td:first-child::after { content: " · oggi"; font-weight: 500; color: var(--warn); }
+  .contact p { margin: 0 0 .9rem; }
+  .contact .btn { margin-top: .6rem; }
+
+  /* ---------- Prenotazione ---------- */
+  .booking-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 3rem; align-items: start; }
+  .how { color: var(--text-soft); position: sticky; top: 1.5rem; }
+  .how h2 { color: var(--text); }
+  .how ol { padding-left: 1.2rem; margin: 1rem 0 1.5rem; }
+  .how li { margin-bottom: .5rem; }
+
+  .summary {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+    padding: 1.2rem 1.3rem; color: var(--text);
+  }
+  .sum-head { display: flex; justify-content: space-between; font-weight: 600; }
+  .bar { height: 8px; border-radius: 99px; background: var(--line); margin: .6rem 0 1rem; overflow: hidden; }
+  .bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--tuorlo), var(--pomodoro)); border-radius: inherit; transition: width .5s var(--ease); }
+  .summary dl { margin: 0; display: grid; gap: .45rem; }
+  .summary dl div { display: grid; grid-template-columns: 6.5rem 1fr; gap: .5rem; font-size: .95rem; }
+  .summary dt { color: var(--text-soft); }
+  .summary dd { margin: 0; font-weight: 600; }
+  .summary .sum-miss { margin: .9rem 0 0; font-size: .88rem; color: var(--text-soft); }
+
+  form {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 18px; padding: 1.8rem;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem 1.2rem;
+  }
+  .field { display: flex; flex-direction: column; gap: .4rem; min-width: 0; }
+  .field.full { grid-column: 1 / -1; }
+  label, .label { font-weight: 600; font-size: .95rem; }
+  .opt { font-weight: 400; color: var(--text-soft); }
+  input, select, textarea {
+    font: inherit; color: var(--text); background: var(--bg);
+    border: 1.5px solid var(--line); border-radius: 10px; padding: .75rem .85rem; width: 100%;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  input:hover, select:hover, textarea:hover { border-color: var(--crosta); }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--pomodoro); box-shadow: 0 0 0 3px rgba(179,38,30,.2); }
+  [aria-invalid="true"] { border-color: var(--warn); }
+  textarea { min-height: 84px; resize: vertical; }
+  .hint { font-size: .87rem; color: var(--text-soft); }
+  .hint.warn, .err { color: var(--warn); font-weight: 600; font-size: .87rem; }
+  .err:empty { display: none; }
+
+  .chipset { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .chip {
+    border: 1.5px solid var(--line); background: var(--bg); color: var(--text);
+    font: 500 .9rem/1 var(--font-body); padding: .55rem .85rem; border-radius: 999px; cursor: pointer;
+    transition: transform .15s var(--ease), border-color .2s, background .2s, color .2s;
+  }
+  .chip:hover { transform: translateY(-2px); border-color: var(--pomodoro); }
+  .chip.on { background: var(--btn-bg); border-color: var(--btn-bg); color: #fff; }
+
+  .slot-group + .slot-group { margin-top: .7rem; }
+  .slot-label { display: block; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-soft); margin-bottom: .35rem; }
+  .slot { position: relative; }
+  .slot input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .slot span {
+    display: inline-block; padding: .5rem .75rem; border-radius: 10px; cursor: pointer;
+    border: 1.5px solid var(--line); background: var(--bg); font-weight: 500; font-variant-numeric: tabular-nums;
+    transition: transform .15s var(--ease), border-color .2s, background .2s;
+  }
+  .slot span:hover { transform: translateY(-2px); border-color: var(--pomodoro); }
+  .slot input:checked + span { background: var(--btn-bg); border-color: var(--btn-bg); color: #fff; }
+  .slot input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .slots-empty { color: var(--text-soft); font-size: .95rem; padding: .7rem 0; }
+
+  .stepper { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 999px; background: var(--bg); width: max-content; }
+  .stepper button {
+    width: 2.6rem; height: 2.6rem; border-radius: 50%; border: 0; background: transparent;
+    color: var(--text); font: 600 1.3rem/1 var(--font-body); cursor: pointer; transition: background .2s, transform .15s;
+  }
+  .stepper button:hover:not(:disabled) { background: var(--surface-alt); transform: scale(1.1); }
+  .stepper button:disabled { opacity: .35; cursor: default; }
+  .stepper output { min-width: 6.5rem; text-align: center; font-weight: 600; }
+
+  /* Menu a tendina a scelta multipla */
+  .ms { position: relative; }
+  .ms-btn {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: .8rem;
+    font: inherit; color: var(--text); background: var(--bg); text-align: left; cursor: pointer;
+    border: 1.5px solid var(--line); border-radius: 10px; padding: .75rem .85rem;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .ms-btn:hover { border-color: var(--crosta); }
+  .ms-btn[aria-expanded="true"] { border-color: var(--pomodoro); box-shadow: 0 0 0 3px rgba(179,38,30,.2); }
+  .ms-btn svg { flex: none; transition: transform .25s var(--ease); }
+  .ms-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .ms-count {
+    display: inline-grid; place-items: center; min-width: 1.5rem; height: 1.5rem; padding: 0 .4rem; margin-left: .4rem;
+    border-radius: 99px; background: var(--btn-bg); color: #fff; font-size: .8rem; font-weight: 600;
+  }
+  .ms-panel {
+    position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + .4rem);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: 0 18px 40px rgba(0,0,0,.18); max-height: 380px; overflow: auto;
+    padding: .5rem; animation: apri .2s var(--ease);
+  }
+  @keyframes apri { from { opacity: 0; transform: translateY(-6px); } }
+  .ms-group { padding: .3rem .2rem .4rem; }
+  .ms-group + .ms-group { border-top: 1px solid var(--line); }
+  .ms-gtitle { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-soft); padding: .35rem .6rem; }
+  .ms-opt {
+    display: flex; align-items: center; gap: .7rem; padding: .55rem .6rem; border-radius: 10px;
+    cursor: pointer; font-weight: 500; transition: background .15s;
+  }
+  .ms-opt:hover { background: var(--surface-alt); }
+  .ms-opt input { width: 1.15rem; height: 1.15rem; flex: none; accent-color: var(--btn-bg); padding: 0; }
+  .ms-opt small { display: block; font-weight: 400; color: var(--text-soft); font-size: .82rem; }
+  .ms-foot { position: sticky; bottom: -.5rem; background: var(--surface); padding: .5rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); margin: .2rem -.5rem -.5rem; }
+  .ms-foot .btn { padding: .65rem 1.1rem; font-size: .92rem; }
+  .linkbtn { background: none; border: 0; color: var(--text-soft); font: inherit; font-size: .9rem; text-decoration: underline; cursor: pointer; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .tag {
+    display: inline-flex; align-items: center; gap: .4rem; cursor: pointer;
+    border: 0; background: var(--surface-alt); color: var(--text); font: 500 .88rem/1 var(--font-body);
+    padding: .45rem .5rem .45rem .75rem; border-radius: 999px; animation: pop .25s var(--ease);
+  }
+  .tag b { display: inline-grid; place-items: center; width: 1.2rem; height: 1.2rem; border-radius: 50%; background: var(--line); font-weight: 600; transition: background .2s, color .2s; }
+  .tag:hover b { background: var(--btn-bg); color: #fff; }
+  @keyframes pop { from { transform: scale(.7); opacity: 0; } }
+
+  .xps { display: grid; gap: .8rem; }
+  .xps:empty { display: none; }
+  .xp {
+    background: var(--surface-alt); border-left: 4px solid var(--tuorlo);
+    border-radius: 12px; padding: 1rem 1.1rem; font-size: .95rem;
+    animation: scendi .3s var(--ease);
+  }
+  @keyframes scendi { from { opacity: 0; transform: translateY(-8px); } }
+  .xp.legal { border-left-color: var(--pomodoro); }
+  .xp h4 { margin: 0 0 .5rem; font-size: 1rem; }
+  .xp p { margin: .3rem 0; }
+  .xp ul, .xp ol { margin: .4rem 0; padding-left: 1.2rem; }
+  .xp li { margin-bottom: .35rem; }
+  .xp .row { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin-top: .6rem; }
+  .xp .small { font-size: .84rem; color: var(--text-soft); }
+  .xp .inline-btn { margin-top: .5rem; }
+  .check { display: flex; gap: .6rem; align-items: flex-start; font-weight: 600; font-size: .93rem; margin-top: .7rem; cursor: pointer; }
+  .check input, .consent input { width: 1.15rem; height: 1.15rem; flex: none; margin-top: .2rem; accent-color: var(--btn-bg); padding: 0; }
+  .consent { display: flex; gap: .6rem; align-items: flex-start; font-weight: 400; font-size: .92rem; cursor: pointer; }
+  form .btn-main { justify-self: start; }
+
+  .result {
+    grid-column: 1 / -1; display: none;
+    background: var(--surface-alt); border-radius: 12px; padding: 1rem 1.2rem;
+  }
+  .result.show { display: block; animation: scendi .3s var(--ease); }
+  .result strong { display: block; margin-bottom: .3rem; }
+  .result pre { white-space: pre-wrap; font: inherit; margin: .6rem 0 0; color: var(--text-soft); }
+
+  .conf { position: fixed; z-index: 50; width: 9px; height: 13px; pointer-events: none; animation: vola 1.3s cubic-bezier(.2,.6,.4,1) forwards; }
+  @keyframes vola {
+    60% { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 1; }
+    100% { transform: translate(calc(var(--dx) * 1.15), calc(var(--dy) + 180px)) rotate(calc(var(--r) * 2)); opacity: 0; }
+  }
+
+  footer { border-top: 1px solid var(--line); padding-block: 2rem 3rem; color: var(--text-soft); font-size: .92rem; }
+  footer p { margin: .3rem 0; }
+
+  .mobile-bar { display: none; }
+
+  @media (max-width: 820px) {
+    .nav a:not(.nav-cta) { display: none; }
+    .hero-grid, .menu-grid, .info-grid, .booking-grid { grid-template-columns: 1fr; }
+    .hero-grid { padding-block: 1.5rem 4rem; gap: 2.5rem; }
+    .pizzas { max-width: 420px; }
+    .pz-tip { opacity: .85; transform: none; }
+    .how { position: static; }
+    form { grid-template-columns: 1fr; padding: 1.3rem; }
+    .xp .row { grid-template-columns: 1fr; }
+    .mobile-bar {
+      display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+      padding: .7rem 1rem calc(.7rem + env(safe-area-inset-bottom, 0px));
+      background: var(--bg); border-top: 1px solid var(--line);
+      transition: transform .3s var(--ease);
+    }
+    .mobile-bar.hide { transform: translateY(110%); }
+    .mobile-bar .btn { display: block; text-align: center; }
+    body { padding-bottom: 5rem; }
+  }
+
+  /* =====================================================================
+     EFFETTO VETRO (stile Apple)
+     Vetro smerigliato: sfondo traslucido + sfocatura di ciò che sta dietro,
+     bordo chiaro sottile, riflesso in alto e ombra morbida.
+     Dietro al vetro c’è uno sfondo “a nuvole” con i colori degli ingredienti
+     e una grana leggera, altrimenti il vetro non si vedrebbe.
+     ===================================================================== */
+  :root {
+    --glass-bg: rgba(255, 255, 255, .55);
+    --glass-bg-strong: rgba(255, 255, 255, .78);
+    --glass-border: rgba(255, 255, 255, .75);
+    --glass-edge: rgba(42, 36, 33, .10);
+    --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 -1px 0 rgba(255, 255, 255, .25);
+    --glass-shadow: 0 18px 40px -14px rgba(90, 30, 15, .22), 0 2px 8px rgba(90, 30, 15, .06);
+    --glass-blur: blur(22px) saturate(180%);
+    --field-bg: rgba(255, 255, 255, .62);
+    --hover-tint: rgba(242, 181, 58, .20);
+    --noise-opacity: .05;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --glass-bg: rgba(46, 39, 36, .55);
+      --glass-bg-strong: rgba(46, 39, 36, .82);
+      --glass-border: rgba(255, 255, 255, .14);
+      --glass-edge: rgba(255, 255, 255, .10);
+      --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 -1px 0 rgba(255, 255, 255, .04);
+      --glass-shadow: 0 18px 40px -14px rgba(0, 0, 0, .6), 0 2px 8px rgba(0, 0, 0, .25);
+      --field-bg: rgba(0, 0, 0, .22);
+      --hover-tint: rgba(242, 181, 58, .14);
+      --noise-opacity: .07;
+    }
+  }
+  /* Senza supporto alla sfocatura, o se l’utente chiede meno trasparenza: vetro quasi pieno */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root { --glass-bg: rgba(255, 255, 255, .93); --glass-bg-strong: rgba(255, 255, 255, .97); }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    :root { --glass-bg: var(--surface); --glass-bg-strong: var(--surface); --field-bg: var(--bg); }
+  }
+
+  /* Sfondo a nuvole + grana */
+  html { background: var(--bg); scroll-padding-top: 5.5rem; }
+  body { background: transparent; }
+  body::before {
+    content: ""; position: fixed; inset: -10%; z-index: -2; pointer-events: none;
+    background:
+      radial-gradient(38% 34% at 10% 28%, rgba(242, 181, 58, .38), transparent 70%),
+      radial-gradient(34% 38% at 90% 18%, rgba(179, 38, 30, .22), transparent 70%),
+      radial-gradient(44% 40% at 78% 82%, rgba(233, 183, 169, .50), transparent 70%),
+      radial-gradient(40% 34% at 18% 88%, rgba(241, 228, 188, .70), transparent 70%);
+    filter: blur(24px);
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    opacity: var(--noise-opacity);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* Ricetta del vetro, condivisa */
+  .topbar, .pizzas, .menu-grid, .info-grid, .summary, form, .ms-panel,
+  .badge, .xp, .result, .mobile-bar {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-hi), var(--glass-shadow);
+  }
+
+  /* Barra di navigazione: capsula di vetro che resta in alto */
+  .topbar {
+    position: fixed; z-index: 40;
+    top: calc(.7rem + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%);
+    width: min(1080px, 100% - 1.5rem);
+    padding: .55rem .6rem .55rem 1.3rem; border-radius: 999px;
+    color: var(--text);
+  }
+  .hero .wrap { padding-top: 5.2rem; z-index: auto; } /* così la barra fissa resta sopra a tutto */
+  .logo { color: var(--text); }
+  .nav a { color: var(--text); }
+  .nav .nav-cta {
+    color: #fff;
+    background: linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,0) 55%), var(--btn-bg);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 6px 14px -6px rgba(179,38,30,.6);
+  }
+
+  /* Hero: rosso lucido con angoli arrotondati in basso */
+  .hero {
+    background:
+      radial-gradient(70% 60% at 85% 10%, rgba(255, 190, 120, .28), transparent 70%),
+      linear-gradient(165deg, #C9332A 0%, var(--hero-bg) 45%, #8A1A13 100%);
+    border-radius: 0 0 40px 40px;
+  }
+
+  /* Le pizze appoggiate su un vassoio di vetro */
+  .pizzas {
+    padding: 1.6rem 1.6rem 2.6rem; border-radius: 34px;
+    background: rgba(255, 255, 255, .12);
+    border-color: rgba(255, 255, 255, .30);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 24px 50px -20px rgba(0,0,0,.45);
+  }
+
+  /* Bottoni */
+  .btn-light {
+    background: rgba(255, 255, 255, .88);
+    box-shadow: inset 0 1px 0 #fff, 0 10px 24px -10px rgba(0,0,0,.45);
+  }
+  .btn-ghost {
+    background: rgba(255, 255, 255, .14);
+    -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.45), inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .btn-ghost:hover { background: rgba(255, 255, 255, .22); box-shadow: inset 0 0 0 1px rgba(255,255,255,.6), inset 0 1px 0 rgba(255,255,255,.7), 0 10px 22px rgba(0,0,0,.2); }
+  .btn-main {
+    background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0) 55%), var(--btn-bg);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 10px 22px -8px rgba(179,38,30,.6);
+  }
+
+  /* Pannelli di contenuto */
+  .menu-grid { padding: 2.2rem 2.4rem; border-radius: 32px; }
+  .info { background: transparent; }
+  .info-grid { padding: 2.2rem 2.4rem; border-radius: 32px; }
+  form { border-radius: 28px; }
+  .summary { border-radius: 24px; }
+  .how { top: 6rem; }
+  .badge { background: var(--glass-bg-strong); }
+  .xp { border-left: 4px solid var(--tuorlo); border-radius: 16px; }
+  .xp.legal { border-left-color: var(--pomodoro); }
+  .result { border-radius: 16px; }
+  .ms-panel { background: var(--glass-bg-strong); border-radius: 18px; }
+  .ms-foot { background: transparent; border-top-color: var(--glass-edge); }
+
+  /* Evidenziazioni al passaggio, più leggere sul vetro */
+  .item::before { background: var(--hover-tint); }
+  .hours td { border-bottom-color: var(--glass-edge); }
+  .hours tr:hover td { background: var(--hover-tint); }
+  .ms-opt:hover { background: var(--hover-tint); }
+  .tag { background: var(--field-bg); box-shadow: inset 0 0 0 1px var(--glass-edge); }
+
+  /* Campi: vetro più chiaro, senza sfocatura (più leggero sul telefono) */
+  input, select, textarea, .ms-btn, .chip, .slot span, .stepper {
+    background: var(--field-bg);
+    border-color: var(--glass-edge);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .chip.on, .slot input:checked + span {
+    background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0) 55%), var(--btn-bg);
+    border-color: transparent; color: #fff;
+  }
+  .bar { background: var(--glass-edge); }
+
+  footer { border-top-color: var(--glass-edge); }
+
+  @media (max-width: 820px) {
+    .topbar { padding-left: 1.1rem; }
+    .hero { border-radius: 0 0 28px 28px; }
+    .menu-grid, .info-grid { padding: 1.5rem 1.3rem; border-radius: 26px; }
+    .pizzas { padding: 1.1rem 1.1rem 2.2rem; border-radius: 28px; }
+    .mobile-bar {
+      left: .6rem; right: .6rem; bottom: calc(.6rem + env(safe-area-inset-bottom, 0px));
+      padding: .5rem; border-radius: 999px;
+    }
+    .mobile-bar.hide { transform: translateY(160%); }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero" id="hero">
+  <div class="trail" id="trail" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="logo" href="#">Ale Triciana</a>
+      <nav class="nav" aria-label="Sezioni">
+        <a href="#menu">Menu</a>
+        <a href="#orari">Orari e dove siamo</a>
+        <a class="nav-cta" href="#prenota">Prenota</a>
+      </nav>
+    </div>
+
+    <div class="hero-grid">
+      <div>
+        <h1>Le quattro romane, su una pizza.</h1>
+        <p class="lead">Pizzeria a Ciampino. Carbonara, amatriciana, gricia e cacio e pepe, cotte in pala come si deve.</p>
+        <div class="hero-actions">
+          <a class="btn btn-light" href="#prenota">Prenota un tavolo</a>
+          <a class="btn btn-ghost" href="#menu">Guarda il menu</a>
+        </div>
+        <p class="hero-hint">Passa sopra una pizza per vedere cosa c’è sopra. Cliccala per trovarla nel menu.</p>
+      </div>
+
+      <div class="pizzas">
+        <button class="pz" type="button" data-pizza="carbonara" aria-label="Carbonara: vedi nel menu">
+          <span class="pz-plate"><span class="pz-in" style="display:block"></span><span class="steam" aria-hidden="true"><span></span><span></span><span></span></span></span>
+          <span class="pz-name">Carbonara</span>
+          <span class="pz-tip">Guanciale, crema di tuorlo, pecorino, pepe</span>
+        </button>
+        <button class="pz" type="button" data-pizza="amatriciana" aria-label="Amatriciana: vedi nel menu">
+          <span class="pz-plate"><span class="pz-in" style="display:block"></span><span class="steam" aria-hidden="true"><span></span><span></span><span></span></span></span>
+          <span class="pz-name">Amatriciana</span>
+          <span class="pz-tip">San Marzano, guanciale, pecorino, peperoncino</span>
+        </button>
+        <button class="pz" type="button" data-pizza="gricia" aria-label="Gricia: vedi nel menu">
+          <span class="pz-plate"><span class="pz-in" style="display:block"></span><span class="steam" aria-hidden="true"><span></span><span></span><span></span></span></span>
+          <span class="pz-name">Gricia</span>
+          <span class="pz-tip">Fior di latte, guanciale, pecorino, pepe</span>
+        </button>
+        <button class="pz" type="button" data-pizza="cacio" aria-label="Cacio e pepe: vedi nel menu">
+          <span class="pz-plate"><span class="pz-in" style="display:block"></span><span class="steam" aria-hidden="true"><span></span><span></span><span></span></span></span>
+          <span class="pz-name">Cacio e pepe</span>
+          <span class="pz-tip">Crema di pecorino e pepe nero tostato</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="menu">
+    <div class="wrap">
+      <h2 class="reveal">Il menu</h2>
+      <p class="intro reveal">Le quattro romane sono il motivo per cui esistiamo. Il resto è quello che ti aspetti da una pizzeria di quartiere, fatto con cura.</p>
+
+      <div class="menu-grid">
+        <div>
+          <div class="menu-block romane reveal">
+            <h3>Le quattro romane</h3>
+            <div class="item" id="m-carbonara" data-pizza="carbonara">
+              <div class="item-row"><span>Carbonara</span><span class="dots"></span><span class="price">11,00 €</span></div>
+              <p>Fior di latte, guanciale croccante, crema di tuorlo aggiunta a fine cottura, pecorino romano DOP e pepe nero.</p>
+            </div>
+            <div class="item" id="m-amatriciana" data-pizza="amatriciana">
+              <div class="item-row"><span>Amatriciana</span><span class="dots"></span><span class="price">10,50 €</span></div>
+              <p>Pomodoro San Marzano, guanciale, pecorino romano e un filo di peperoncino.</p>
+            </div>
+            <div class="item" id="m-gricia" data-pizza="gricia">
+              <div class="item-row"><span>Gricia</span><span class="dots"></span><span class="price">10,00 €</span></div>
+              <p>Fior di latte, guanciale e pecorino romano, con pepe nero macinato al momento.</p>
+            </div>
+            <div class="item" id="m-cacio" data-pizza="cacio">
+              <div class="item-row"><span>Cacio e pepe</span><span class="dots"></span><span class="price">9,00 €</span></div>
+              <p>Crema di pecorino romano e pepe nero tostato. Due ingredienti, nessun posto dove nascondersi.</p>
+            </div>
+          </div>
+
+          <div class="menu-block reveal">
+            <h3>Le altre pizze</h3>
+            <div class="item"><div class="item-row"><span>Margherita</span><span class="dots"></span><span class="price">7,00 €</span></div></div>
+            <div class="item"><div class="item-row"><span>Diavola</span><span class="dots"></span><span class="price">8,50 €</span></div></div>
+            <div class="item"><div class="item-row"><span>Fiori di zucca e alici</span><span class="dots"></span><span class="price">9,50 €</span></div></div>
+            <div class="item"><div class="item-row"><span>Patate e rosmarino (bianca)</span><span class="dots"></span><span class="price">8,00 €</span></div></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="menu-block reveal">
+            <h3>Fritti</h3>
+            <div class="item"><div class="item-row"><span>Supplì al telefono</span><span class="dots"></span><span class="price">2,50 €</span></div></div>
+            <div class="item"><div class="item-row"><span>Fiore di zucca fritto</span><span class="dots"></span><span class="price">3,00 €</span></div></div>
+            <div class="item"><div class="item-row"><span>Olive ascolane (6)</span><span class="dots"></span><span class="price">4,50 €</span></div></div>
+            <div class="item"><div class="item-row"><span>Crocchette di patate (4)</span><span class="dots"></span><span class="price">4,00 €</span></div></div>
+          </div>
+
+          <div class="menu-block reveal">
+            <h3>Da bere</h3>
+            <div class="item"><div class="item-row"><span>Birra alla spina, media</span><span class="dots"></span><span class="price">5,00 €</span></div></div>
+            <div class="item"><div class="item-row"><span>Birra artigianale 33 cl</span><span class="dots"></span><span class="price">6,00 €</span></div></div>
+            <div class="item"><div class="item-row"><span>Vino della casa, ¼ l</span><span class="dots"></span><span class="price">4,50 €</span></div></div>
+            <div class="item"><div class="item-row"><span>Acqua 0,75 l</span><span class="dots"></span><span class="price">2,00 €</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="orari" class="info">
+    <div class="wrap info-grid">
+      <div class="reveal">
+        <h2>Orari</h2>
+        <p class="badge" id="badge"><i></i><span>Orari di apertura</span></p>
+        <table class="hours">
+          <tbody>
+            <tr class="closed" data-days="1"><td>Lunedì</td><td>Chiuso</td></tr>
+            <tr data-days="2,3,4,5"><td>Martedì – Venerdì</td><td>19:00 – 23:00</td></tr>
+            <tr data-days="6"><td>Sabato</td><td>12:30 – 15:00 · 19:00 – 23:30</td></tr>
+            <tr data-days="0"><td>Domenica</td><td>12:30 – 15:00 · 19:00 – 23:00</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="contact reveal">
+        <h2>Dove siamo</h2>
+        <p>Via dell’Esempio 12, 00043 Ciampino (RM)</p>
+        <p>A cinque minuti a piedi dalla stazione. Parcheggio in strada.</p>
+        <p>Telefono: <a href="tel:+390600000000">06 0000 0000</a></p>
+        <a class="btn btn-main" href="https://www.google.com/maps/search/?api=1&query=Ciampino" target="_blank" rel="noopener">Apri in Google Maps</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="prenota">
+    <div class="wrap booking-grid">
+      <div class="how reveal">
+        <h2>Prenota un tavolo</h2>
+        <p>Niente attesa al telefono. Ci vuole un minuto.</p>
+        <ol>
+          <li>Scegli giorno, ora e quante persone siete.</li>
+          <li>Aggiungi le richieste speciali, se ne hai.</li>
+          <li>Si apre WhatsApp con la richiesta già scritta: premi invio e ti confermiamo il tavolo.</li>
+        </ol>
+
+        <aside class="summary" aria-label="Riepilogo della prenotazione">
+          <div class="sum-head"><span>La tua richiesta</span><span id="sum-pct">0%</span></div>
+          <div class="bar"><span id="sum-bar"></span></div>
+          <dl>
+            <div><dt>Giorno</dt><dd id="s-data">–</dd></div>
+            <div><dt>Ora</dt><dd id="s-ora">–</dd></div>
+            <div><dt>Persone</dt><dd id="s-persone">2</dd></div>
+            <div><dt>Nome</dt><dd id="s-nome">–</dd></div>
+            <div><dt>Richieste</dt><dd id="s-extra">Nessuna</dd></div>
+          </dl>
+          <p class="sum-miss" id="s-miss"></p>
+        </aside>
+      </div>
+
+      <form id="booking" novalidate class="reveal">
+        <div class="field full">
+          <label for="data">Giorno</label>
+          <div class="chipset" id="quick-dates" aria-label="Date veloci"></div>
+          <input id="data" name="data" type="date">
+          <span class="hint" id="data-hint">Il lunedì siamo chiusi.</span>
+          <span class="err" id="err-data"></span>
+        </div>
+
+        <div class="field full">
+          <span class="label" id="ora-label">Ora</span>
+          <div id="slots" role="radiogroup" aria-labelledby="ora-label">
+            <p class="slots-empty">Scegli prima il giorno: ti mostriamo gli orari liberi.</p>
+          </div>
+          <span class="err" id="err-ora"></span>
+        </div>
+
+        <div class="field full">
+          <span class="label" id="persone-label">Persone</span>
+          <div class="stepper" role="group" aria-labelledby="persone-label">
+            <button type="button" id="meno" aria-label="Una persona in meno">−</button>
+            <output id="persone-out" aria-live="polite">2 persone</output>
+            <button type="button" id="piu" aria-label="Una persona in più">+</button>
+          </div>
+          <span class="hint" id="persone-hint"></span>
+        </div>
+
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input id="nome" name="nome" autocomplete="name">
+          <span class="err" id="err-nome"></span>
+        </div>
+        <div class="field">
+          <label for="telefono">Telefono</label>
+          <input id="telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel" placeholder="333 123 4567">
+          <span class="err" id="err-telefono"></span>
+        </div>
+
+        <div class="field full">
+          <span class="label" id="extra-label">Richieste speciali <span class="opt">(puoi sceglierne più di una)</span></span>
+          <div class="ms" id="ms">
+            <button type="button" class="ms-btn" id="ms-btn" aria-haspopup="true" aria-expanded="false" aria-controls="ms-panel">
+              <span id="ms-text">Nessuna richiesta</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="ms-panel" id="ms-panel" hidden></div>
+          </div>
+          <div class="tags" id="tags"></div>
+        </div>
+
+        <div class="field full xps" id="xps"></div>
+
+        <div class="field full">
+          <label for="note">Note (facoltative)</label>
+          <textarea id="note" name="note" placeholder="Qualsiasi altra cosa che dobbiamo sapere…"></textarea>
+        </div>
+        <div class="field full">
+          <label class="consent">
+            <input type="checkbox" id="privacy">
+            <span>Acconsento all’uso di nome e telefono solo per gestire questa prenotazione. <a href="#privacy-info">Informativa privacy</a></span>
+          </label>
+          <span class="err" id="err-privacy"></span>
+        </div>
+        <button class="btn btn-main" type="submit" id="invia">Invia la richiesta</button>
+        <div class="result" id="result" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Ale Triciana</strong> · Via dell’Esempio 12, Ciampino · P.IVA 00000000000</p>
+    <p id="privacy-info">I dati della prenotazione servono solo a confermarti il tavolo e non vengono usati per altro.</p>
+    <p>Sito dimostrativo: Ale Triciana è un locale inventato, prezzi, orari e regole sono di esempio.</p>
+  </div>
+</footer>
+
+<div class="float-pizza" id="float-pizza" aria-hidden="true"></div>
+<div class="mobile-bar" id="mobile-bar"><a class="btn btn-main" href="#prenota">Prenota un tavolo</a></div>
+
+<!-- Pannelli delle richieste speciali (mostrati solo se selezionate) -->
+<template id="tpl-panels">
+  <div class="xp" data-for="compleanno">
+    <h4>Compleanno o festa</h4>
+    <p>Prepariamo il tavolo e, se vuoi, portiamo una candelina sulla pizza o sul dolce.</p>
+    <div class="row">
+      <div class="field"><label for="festeggiato">Chi festeggia? <span class="opt">(facoltativo)</span></label><input id="festeggiato"></div>
+      <div class="field"><label for="anni">Quanti anni? <span class="opt">(facoltativo)</span></label><input id="anni" type="number" min="1" max="120" inputmode="numeric"></div>
+    </div>
+    <button type="button" class="chip inline-btn" id="add-torta">Porti una torta da fuori? Leggi le regole</button>
+  </div>
+
+  <div class="xp legal" data-for="torta">
+    <h4>Torta portata da fuori: cosa serve</h4>
+    <p>In sala possiamo servire solo alimenti di cui si conosce la provenienza (tracciabilità, Reg. CE 178/2002, e igiene degli alimenti, Reg. CE 852/2004). Quindi:</p>
+    <ol>
+      <li><strong>Solo torte di pasticceria o di un laboratorio autorizzato.</strong> Le torte fatte in casa non possiamo servirle.</li>
+      <li><strong>Porta lo scontrino o la fattura</strong> della pasticceria, con data e nome del negozio. Consegnalo insieme alla torta: lo teniamo con la torta finché resta da noi.</li>
+      <li><strong>Serve l’elenco di ingredienti e allergeni</strong> (etichetta o foglio della pasticceria, Reg. UE 1169/2011). Se al tavolo c’è qualcuno con allergie, controllalo prima.</li>
+      <li><strong>Consegnala al personale appena arrivi.</strong> La teniamo in frigo, la tagliamo e la serviamo noi.</li>
+      <li>Torte con panna, crema o mascarpone: trasportale in borsa frigo, devono arrivare fredde.</li>
+      <li><strong>Servizio torta: 1,50 € a persona</strong> (taglio, piattini e posate).</li>
+      <li>Candeline sì. Fontanelle, stelline scintillanti e candele pirotecniche no: in sala non sono ammesse per sicurezza antincendio.</li>
+    </ol>
+    <p class="small">Il locale non risponde di ingredienti e allergeni di prodotti preparati da altri.</p>
+    <label class="check"><input type="checkbox" id="torta-ok"> Ho letto: porto la torta di pasticceria con scontrino ed elenco ingredienti.</label>
+    <span class="err" id="err-torta"></span>
+  </div>
+
+  <div class="xp" data-for="candeline">
+    <h4>Candelina</h4>
+    <p>Te la portiamo noi su pizza o dolce, al momento che ci dici. Candeline normali sì; fontanelle e stelline scintillanti no, per sicurezza.</p>
+  </div>
+
+  <div class="xp" data-for="tranquillo">
+    <h4>Tavolo tranquillo</h4>
+    <p>Ti teniamo un tavolo in un angolo più riservato, se è libero. Se c’è una sorpresa, scrivila nelle note: non la diciamo a nessuno.</p>
+  </div>
+
+  <div class="xp" data-for="seggiolone">
+    <h4>Seggiolone</h4>
+    <div class="row">
+      <div class="field"><label for="n-seggioloni">Quanti?</label>
+        <select id="n-seggioloni"><option>1</option><option>2</option><option>3</option></select>
+      </div>
+    </div>
+    <p class="small">Ne abbiamo tre in tutto: te li teniamo da parte.</p>
+  </div>
+
+  <div class="xp" data-for="passeggino">
+    <h4>Passeggino</h4>
+    <p>Ti diamo un tavolo con spazio accanto per il passeggino.</p>
+  </div>
+
+  <div class="xp" data-for="accessibile">
+    <h4>Accesso in carrozzina</h4>
+    <p>Ingresso senza gradini e bagno accessibile. Ti teniamo un tavolo facile da raggiungere e senza sedia, così ti accomodi direttamente.</p>
+  </div>
+
+  <div class="xp legal" data-for="allergie">
+    <h4>Allergie o intolleranze</h4>
+    <div class="field"><label for="allergie-txt">Quali, e per quante persone?</label>
+      <textarea id="allergie-txt" placeholder="Es. 1 persona allergica alla frutta a guscio, 1 intollerante al lattosio"></textarea>
+      <span class="err" id="err-allergie"></span>
+    </div>
+    <ul>
+      <li>In sala c’è il registro dei 14 allergeni (Reg. UE 1169/2011): chiedilo pure.</li>
+      <li>In cucina usiamo farina, latte, uova e frutta a guscio: non possiamo escludere del tutto la contaminazione crociata.</li>
+      <li>Ricordalo anche al cameriere quando ordini.</li>
+    </ul>
+  </div>
+
+  <div class="xp legal" data-for="senzaglutine">
+    <h4>Impasto senza glutine (+2,00 €)</h4>
+    <p>Preparato a parte e cotto su teglia dedicata, ma nello stesso forno delle altre pizze. Non possiamo garantire l’assenza totale di tracce di glutine: se sei celiaco, valuta tu il rischio.</p>
+  </div>
+
+  <div class="xp" data-for="vegetariano">
+    <h4>Opzioni vegetariane</h4>
+    <p>Margherita, cacio e pepe, patate e rosmarino, fritti senza carne e amatriciana senza guanciale su richiesta.</p>
+  </div>
+
+  <div class="xp" data-for="aperto">
+    <h4>Tavolo all’aperto</h4>
+    <p>Il dehors dipende da meteo e stagione: lo chiediamo ma non possiamo garantirlo. Se piove, ti spostiamo dentro. Fuori si può fumare solo dove c’è il posacenere.</p>
+  </div>
+
+  <div class="xp" data-for="cane">
+    <h4>Con il cane</h4>
+    <p>Cani benvenuti, al guinzaglio e senza salire su sedie o tavoli. Per taglie grandi ti diamo un tavolo con più spazio. L’acqua per lui la portiamo noi.</p>
+  </div>
+</template>
+
+<script>
+  // ===== CONFIGURAZIONE =====
+  // whatsapp: numero del locale, senza + e senza spazi. Per le prove metti il tuo.
+  // webhook: lascia vuoto per usare WhatsApp. Se inserisci l'URL del webhook n8n,
+  // la prenotazione viene inviata a n8n (che può salvarla e avvisare il locale).
+  const CONFIG = {
+    nomeLocale: "Ale Triciana",
+    whatsapp: "393276853015",
+    webhook: "",
+    maxPersone: 8,
+    telefonoLocale: "06 0000 0000"
+  };
+
+  // Orari: 0 = domenica … 6 = sabato. Ultimo tavolo un'ora prima della chiusura.
+  const ORARI = {
+    0: [["12:30", "15:00"], ["19:00", "23:00"]],
+    1: [],
+    2: [["19:00", "23:00"]], 3: [["19:00", "23:00"]], 4: [["19:00", "23:00"]], 5: [["19:00", "23:00"]],
+    6: [["12:30", "15:00"], ["19:00", "23:30"]]
+  };
+
+  const EXTRAS = [
+    { id: "compleanno",  g: "Occasioni", label: "Compleanno o festa", sub: "Prepariamo il tavolo" },
+    { id: "torta",       g: "Occasioni", label: "Porto una torta da fuori", sub: "Serve lo scontrino della pasticceria" },
+    { id: "candeline",   g: "Occasioni", label: "Candelina sulla pizza o sul dolce" },
+    { id: "tranquillo",  g: "Occasioni", label: "Anniversario o tavolo tranquillo" },
+    { id: "seggiolone",  g: "Bambini e accessibilità", label: "Seggiolone" },
+    { id: "passeggino",  g: "Bambini e accessibilità", label: "Spazio per il passeggino" },
+    { id: "accessibile", g: "Bambini e accessibilità", label: "Accesso in carrozzina" },
+    { id: "allergie",    g: "A tavola", label: "Allergie o intolleranze" },
+    { id: "senzaglutine",g: "A tavola", label: "Impasto senza glutine", sub: "+2,00 € a pizza" },
+    { id: "vegetariano", g: "A tavola", label: "Opzioni vegetariane" },
+    { id: "aperto",      g: "Il tavolo", label: "Tavolo all’aperto", sub: "Secondo meteo" },
+    { id: "cane",        g: "Il tavolo", label: "Vengo con il cane" }
+  ];
+
+  const $ = s => document.querySelector(s);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  /* =========================================================
+     PIZZE IN SVG (generate con texture, macchie di cottura,
+     guanciale, pecorino e pepe disposti in modo naturale)
+     ========================================================= */
+  function rng(seed) {
+    return function () {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  const PIZZE = {
+    carbonara:   { base: ["#FBF3DD", "#E9D3A0"], yolk: 9, guanciale: 10, pepe: 160, pecorino: 70, brown: 10, seed: 11 },
+    amatriciana: { base: ["#D24A2C", "#9C2416"], tomato: true, guanciale: 9, pepe: 0, chili: 26, pecorino: 120, brown: 0, seed: 23 },
+    gricia:      { base: ["#FBF4E0", "#E8D2A0"], guanciale: 12, pepe: 140, pecorino: 80, brown: 20, seed: 37 },
+    cacio:       { base: ["#F6E8BF", "#DCC185"], guanciale: 0, pepe: 340, pecorino: 180, brown: 12, cream: true, seed: 51 }
+  };
+
+  let pizzaUid = 0;
+  function pizzaSVG(tipo) {
+    const c = PIZZE[tipo], R = rng(c.seed), id = "pz" + (pizzaUid++), seed = c.seed;
+    const rnd = (a, b) => a + R() * (b - a);
+    const f = n => n.toFixed(1);
+    const polar = (rMax, rMin = 0) => {
+      const a = R() * Math.PI * 2, r = rMin + (rMax - rMin) * Math.sqrt(R());
+      return [100 + Math.cos(a) * r, 100 + Math.sin(a) * r, a * 180 / Math.PI];
+    };
+
+    let crustSpots = "", puffs = "", brown = "", tomato = "", yolk = "", gShadow = "", gPieces = "",
+        pecorino = "", pepe = "", chili = "", cream = "";
+
+    for (let i = 0; i < 16; i++) {
+      const [x, y, a] = polar(92, 85);
+      puffs += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(rnd(6, 12))}" ry="${f(rnd(3, 5.5))}" transform="rotate(${f(a + 90)} ${f(x)} ${f(y)})" fill="#F7DCA8" opacity="${f(rnd(.35, .65))}"/>`;
+    }
+    for (let i = 0; i < 40; i++) {
+      const [x, y, a] = polar(96, 82);
+      crustSpots += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(rnd(1, 3.8))}" ry="${f(rnd(.7, 2.3))}" transform="rotate(${f(a + rnd(-40, 40))} ${f(x)} ${f(y)})" fill="#2B170C" opacity="${f(rnd(.35, .85))}"/>`;
+    }
+    for (let i = 0; i < c.brown; i++) {
+      const [x, y] = polar(72);
+      brown += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(rnd(2.5, 7))}" ry="${f(rnd(2, 5))}" fill="#B9783A" opacity="${f(rnd(.25, .55))}"/>`;
+    }
+    if (c.tomato) {
+      for (let i = 0; i < 18; i++) {
+        const [x, y] = polar(72);
+        tomato += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(rnd(5, 13))}" ry="${f(rnd(4, 10))}" fill="${R() > .5 ? "#7E1A10" : "#E46A3E"}" opacity="${f(rnd(.2, .4))}"/>`;
+      }
+    }
+    for (let i = 0; i < (c.yolk || 0); i++) {
+      const [x, y] = polar(56);
+      const r = rnd(9, 17);
+      yolk += `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="url(#${id}y)"/>`;
+      yolk += `<ellipse cx="${f(x - r * .3)}" cy="${f(y - r * .35)}" rx="${f(r * .35)}" ry="${f(r * .18)}" fill="#fff" opacity=".45"/>`;
+    }
+    for (let i = 0; i < c.guanciale; i++) {
+      const [x, y] = polar(62);
+      const w = rnd(12, 18), h = rnd(6.5, 9.5), a = rnd(0, 180);
+      const tr = `translate(${f(x)} ${f(y)}) rotate(${f(a)})`;
+      gShadow += `<rect x="${f(-w / 2)}" y="${f(-h / 2)}" width="${f(w)}" height="${f(h)}" rx="2.4" transform="translate(${f(x + 1.3)} ${f(y + 2)}) rotate(${f(a)})" fill="#000" opacity=".3"/>`;
+      gPieces += `<g transform="${tr}"><rect x="${f(-w / 2)}" y="${f(-h / 2)}" width="${f(w)}" height="${f(h)}" rx="2.4" fill="url(#${id}gu)" stroke="#6E2A15" stroke-opacity=".55" stroke-width=".9"/>` +
+                 `<rect x="${f(-w * .32)}" y="${f(-h / 2 + 1.2)}" width="${f(w * .6)}" height="1.1" rx=".5" fill="#FFF3E6" opacity=".45"/></g>`;
+    }
+    for (let i = 0; i < c.pecorino; i++) {
+      const [x, y] = polar(76);
+      pecorino += `<rect x="${f(x)}" y="${f(y)}" width="${f(rnd(1.2, 3))}" height="${f(rnd(.6, 1.3))}" rx=".4" transform="rotate(${f(rnd(0, 180))} ${f(x)} ${f(y)})" fill="#FFFBEF" opacity="${f(rnd(.7, 1))}"/>`;
+    }
+    for (let i = 0; i < c.pepe; i++) {
+      const [x, y] = polar(78);
+      pepe += `<circle cx="${f(x)}" cy="${f(y)}" r="${rnd(.45, 1.25).toFixed(2)}" fill="#1C1512" opacity="${f(rnd(.6, .95))}"/>`;
+    }
+    for (let i = 0; i < (c.chili || 0); i++) {
+      const [x, y] = polar(72);
+      chili += `<rect x="${f(x)}" y="${f(y)}" width="${f(rnd(1.2, 2.4))}" height="${f(rnd(.8, 1.5))}" rx=".4" transform="rotate(${f(rnd(0, 180))} ${f(x)} ${f(y)})" fill="${R() > .5 ? "#F06A34" : "#6B0F07"}"/>`;
+    }
+    if (c.cream) {
+      for (let i = 0; i < 10; i++) {
+        const [x, y] = polar(60);
+        cream += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(rnd(6, 14))}" ry="${f(rnd(2, 4))}" transform="rotate(${f(rnd(0, 180))} ${f(x)} ${f(y)})" fill="#FFF8E2" opacity="${f(rnd(.25, .5))}"/>`;
+      }
+    }
+
+    return `<svg class="pz-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+<defs>
+  <radialGradient id="${id}c"><stop offset="0" stop-color="#EDBE78"/><stop offset=".84" stop-color="#E5AE66"/><stop offset=".93" stop-color="#CF8F4B"/><stop offset="1" stop-color="#9A5E2A"/></radialGradient>
+  <radialGradient id="${id}b" cx="45%" cy="40%" r="62%"><stop offset="0" stop-color="${c.base[0]}"/><stop offset="1" stop-color="${c.base[1]}"/></radialGradient>
+  <radialGradient id="${id}y" cx="40%" cy="38%"><stop offset="0" stop-color="#FFD866"/><stop offset=".6" stop-color="#F2AE2C"/><stop offset="1" stop-color="#D98A1C" stop-opacity=".85"/></radialGradient>
+  <linearGradient id="${id}gu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F8E2CF"/><stop offset=".38" stop-color="#EDBE9F"/><stop offset=".55" stop-color="#C4664A"/><stop offset=".78" stop-color="#A2452D"/><stop offset="1" stop-color="#D88E68"/></linearGradient>
+  <radialGradient id="${id}gl" cx="34%" cy="28%" r="60%"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <radialGradient id="${id}v"><stop offset=".8" stop-color="#3A1E0C" stop-opacity="0"/><stop offset="1" stop-color="#3A1E0C" stop-opacity=".4"/></radialGradient>
+  <filter id="${id}r" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="${seed}"/><feDisplacementMap in="SourceGraphic" scale="9" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="${id}j" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.3" numOctaves="2" seed="${seed + 5}"/><feDisplacementMap in="SourceGraphic" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="${id}m"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="3" seed="${seed + 3}"/><feColorMatrix type="saturate" values="0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+  <filter id="${id}n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="${seed + 9}"/><feColorMatrix type="saturate" values="0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+  <filter id="${id}s" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.4"/></filter>
+  <filter id="${id}s2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".7"/></filter>
+</defs>
+<g filter="url(#${id}r)"><circle cx="100" cy="100" r="95" fill="url(#${id}c)"/></g>
+<circle cx="100" cy="100" r="95" fill="#000" filter="url(#${id}n)" opacity=".16" style="mix-blend-mode:multiply"/>
+<g filter="url(#${id}s)">${puffs}</g>
+<g filter="url(#${id}s2)">${crustSpots}</g>
+<circle cx="100" cy="100" r="96" fill="url(#${id}v)"/>
+<circle cx="100" cy="100" r="80" fill="none" stroke="#5A3214" stroke-opacity=".35" stroke-width="4" filter="url(#${id}s)"/>
+<g filter="url(#${id}r)"><circle cx="100" cy="100" r="78" fill="url(#${id}b)"/></g>
+<circle cx="100" cy="100" r="76" fill="#000" filter="url(#${id}m)" opacity=".16" style="mix-blend-mode:multiply"/>
+<g filter="url(#${id}s)">${tomato}${brown}${cream}</g>
+<g filter="url(#${id}r)">${yolk}</g>
+<g filter="url(#${id}s)">${gShadow}</g>
+<g filter="url(#${id}j)">${gPieces}</g>
+${pecorino}${chili}${pepe}
+<circle cx="100" cy="100" r="95" fill="url(#${id}gl)"/>
+</svg>`;
+  }
+
+  // Pizze nella hero: inclinazione 3D, riflesso, vapore, clic → menu
+  document.querySelectorAll(".pz").forEach(el => {
+    const tipo = el.dataset.pizza;
+    el.querySelector(".pz-in").innerHTML = pizzaSVG(tipo);
+    const plate = el.querySelector(".pz-plate");
+    if (finePointer && !reduce) {
+      el.addEventListener("mousemove", e => {
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+        plate.style.setProperty("--ry", (x * 22).toFixed(1) + "deg");
+        plate.style.setProperty("--rx", (-y * 22).toFixed(1) + "deg");
+        plate.style.setProperty("--gx", ((x + .5) * 100).toFixed(0) + "%");
+        plate.style.setProperty("--gy", ((y + .5) * 100).toFixed(0) + "%");
+      });
+      el.addEventListener("mouseleave", () => {
+        plate.style.setProperty("--rx", "0deg"); plate.style.setProperty("--ry", "0deg");
+      });
+    }
+    el.addEventListener("click", () => {
+      const t = document.getElementById("m-" + tipo);
+      t.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+      t.classList.remove("flash"); void t.offsetWidth; t.classList.add("flash");
+    });
+  });
+
+  // Luce e scia di pepe e pecorino sotto il cursore nella hero
+  const hero = $("#hero"), trail = $("#trail");
+  if (finePointer) {
+    let last = 0;
+    hero.addEventListener("mousemove", e => {
+      const r = hero.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      hero.style.setProperty("--mx", x + "px");
+      hero.style.setProperty("--my", y + "px");
+      if (reduce) return;
+      const now = performance.now();
+      if (now - last < 35 || trail.childElementCount > 45) return;
+      last = now;
+      const s = document.createElement("span");
+      s.className = "fleck";
+      const isPepe = Math.random() > .35;
+      s.style.cssText = `left:${x}px;top:${y}px;--s:${(isPepe ? 3 + Math.random() * 3 : 4 + Math.random() * 5).toFixed(1)}px;` +
+        `--c:${isPepe ? "#1C1512" : "#FFF3D6"};--dx:${(Math.random() * 30 - 15).toFixed(0)}px;--r:${(Math.random() * 360).toFixed(0)}deg`;
+      s.addEventListener("animationend", () => s.remove());
+      trail.appendChild(s);
+    });
+  }
+
+  // Anteprima della pizza che segue il cursore sulle quattro romane del menu
+  const floatEl = $("#float-pizza");
+  if (finePointer) {
+    const cache = {};
+    let raf = 0, fx = 0, fy = 0;
+    document.querySelectorAll(".romane .item").forEach(item => {
+      item.addEventListener("mouseenter", () => {
+        const t = item.dataset.pizza;
+        cache[t] = cache[t] || pizzaSVG(t);
+        floatEl.innerHTML = cache[t];
+        floatEl.classList.add("show");
+      });
+      item.addEventListener("mousemove", e => {
+        fx = e.clientX + 24; fy = e.clientY - 75;
+        if (fx + 160 > innerWidth) fx = e.clientX - 174;
+        if (!raf) raf = requestAnimationFrame(() => {
+          floatEl.style.setProperty("--fx", fx + "px");
+          floatEl.style.setProperty("--fy", fy + "px");
+          raf = 0;
+        });
+      });
+      item.addEventListener("mouseleave", () => floatEl.classList.remove("show"));
+    });
+  }
+
+  // Comparsa delle sezioni allo scroll
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(entries => entries.forEach(en => {
+      if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+    }), { threshold: .12 });
+    document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+    const bar = $("#mobile-bar");
+    new IntersectionObserver(([en]) => bar.classList.toggle("hide", en.isIntersecting), { threshold: .15 })
+      .observe($("#prenota"));
+  } else {
+    document.querySelectorAll(".reveal").forEach(el => el.classList.add("in"));
+  }
+
+  /* =========================================================
+     ORARI: oggi evidenziato e stato "aperto adesso"
+     ========================================================= */
+  const toMin = t => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  const toHHMM = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  const GIORNI = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
+  const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+
+  (function statoLocale() {
+    const n = new Date(), g = n.getDay(), m = n.getHours() * 60 + n.getMinutes();
+    document.querySelectorAll(".hours tr").forEach(tr => {
+      if (tr.dataset.days.split(",").map(Number).includes(g)) tr.classList.add("today");
+    });
+    const badge = $("#badge"), txt = badge.querySelector("span");
+    const aperto = ORARI[g].find(([a, b]) => m >= toMin(a) && m < toMin(b));
+    if (aperto) { badge.classList.add("open"); txt.textContent = "Aperto adesso, fino alle " + aperto[1]; return; }
+    for (let i = 0; i < 8; i++) {
+      const gg = (g + i) % 7;
+      for (const [a] of ORARI[gg]) {
+        if (i === 0 && toMin(a) <= m) continue;
+        txt.textContent = "Chiuso adesso, riapriamo " + (i === 0 ? "oggi" : i === 1 ? "domani" : GIORNI[gg]) + " alle " + a;
+        return;
+      }
+    }
+  })();
+
+  /* =========================================================
+     PRENOTAZIONE
+     ========================================================= */
+  const form = $("#booking");
+  const dataEl = $("#data"), hintEl = $("#data-hint"), slotsEl = $("#slots");
+  const resultEl = $("#result"), inviaBtn = $("#invia");
+  const state = { persone: 2, extras: new Set() };
+
+  dataEl.min = iso(new Date());
+
+  function slotsFor(dateStr) {
+    const g = new Date(dateStr + "T12:00:00").getDay();
+    const isToday = dateStr === iso(new Date());
+    const now = new Date(), limite = now.getHours() * 60 + now.getMinutes() + 30;
+    return ORARI[g].map(([a, b]) => {
+      const times = [];
+      for (let t = toMin(a); t <= toMin(b) - 60; t += 30) if (!isToday || t >= limite) times.push(toHHMM(t));
+      return { label: toMin(a) < 16 * 60 ? "Pranzo" : "Cena", times };
+    }).filter(x => x.times.length);
+  }
+
+  // Date veloci: i prossimi giorni di apertura
+  (function quickDates() {
+    const box = $("#quick-dates");
+    let n = 0;
+    for (let i = 0; n < 5 && i < 12; i++) {
+      const d = new Date(); d.setDate(d.getDate() + i);
+      const v = iso(d);
+      if (!slotsFor(v).length) continue;
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.dataset.value = v;
+      b.textContent = i === 0 ? "Oggi" : i === 1 ? "Domani" : d.toLocaleDateString("it-IT", { weekday: "short", day: "numeric" });
+      b.addEventListener("click", () => { dataEl.value = v; dataEl.dispatchEvent(new Event("change")); });
+      box.appendChild(b); n++;
+    }
+  })();
+
+  dataEl.addEventListener("change", () => {
+    document.querySelectorAll("#quick-dates .chip").forEach(c => c.classList.toggle("on", c.dataset.value === dataEl.value));
+    setErr("data", "");
+    if (!dataEl.value) { slotsEl.innerHTML = '<p class="slots-empty">Scegli prima il giorno: ti mostriamo gli orari liberi.</p>'; return aggiorna(); }
+    const g = new Date(dataEl.value + "T12:00:00").getDay();
+    if (dataEl.value < iso(new Date())) {
+      hintEl.textContent = "Questa data è già passata."; hintEl.classList.add("warn");
+      slotsEl.innerHTML = ""; return aggiorna();
+    }
+    if (g === 1) {
+      hintEl.textContent = "Il lunedì siamo chiusi: scegli un altro giorno."; hintEl.classList.add("warn");
+      slotsEl.innerHTML = '<p class="slots-empty">Giorno di chiusura.</p>'; return aggiorna();
+    }
+    hintEl.textContent = "Il lunedì siamo chiusi."; hintEl.classList.remove("warn");
+    const gruppi = slotsFor(dataEl.value);
+    if (!gruppi.length) {
+      slotsEl.innerHTML = '<p class="slots-empty">Per oggi non ci sono più orari prenotabili online. Chiamaci al ' + CONFIG.telefonoLocale + '.</p>';
+      return aggiorna();
+    }
+    slotsEl.innerHTML = gruppi.map(gr =>
+      '<div class="slot-group"><span class="slot-label">' + gr.label + '</span><div class="chipset">' +
+      gr.times.map(t => '<label class="slot"><input type="radio" name="ora" value="' + t + '"><span>' + t + '</span></label>').join("") +
+      '</div></div>').join("");
+    aggiorna();
+  });
+  slotsEl.addEventListener("change", () => { setErr("ora", ""); aggiorna(); });
+
+  // Persone
+  const meno = $("#meno"), piu = $("#piu"), personeOut = $("#persone-out"), personeHint = $("#persone-hint");
+  function setPersone(n) {
+    state.persone = Math.max(1, Math.min(CONFIG.maxPersone, n));
+    personeOut.textContent = state.persone === 1 ? "1 persona" : state.persone + " persone";
+    meno.disabled = state.persone <= 1; piu.disabled = state.persone >= CONFIG.maxPersone;
+    personeHint.textContent = state.persone >= CONFIG.maxPersone ? "Siete più di " + CONFIG.maxPersone + "? Chiamaci al " + CONFIG.telefonoLocale + ", così vi prepariamo il tavolo giusto." : "";
+    aggiorna();
+  }
+  meno.addEventListener("click", () => setPersone(state.persone - 1));
+  piu.addEventListener("click", () => setPersone(state.persone + 1));
+
+  // ----- Menu a tendina a scelta multipla -----
+  const msBtn = $("#ms-btn"), msPanel = $("#ms-panel"), msText = $("#ms-text"), tagsEl = $("#tags"), xpsEl = $("#xps");
+  const EXTRA = Object.fromEntries(EXTRAS.map(e => [e.id, e]));
+
+  (function buildMs() {
+    const gruppi = [...new Set(EXTRAS.map(e => e.g))];
+    msPanel.innerHTML = gruppi.map(g =>
+      '<div class="ms-group" role="group" aria-label="' + g + '"><div class="ms-gtitle">' + g + '</div>' +
+      EXTRAS.filter(e => e.g === g).map(e =>
+        '<label class="ms-opt"><input type="checkbox" value="' + e.id + '"><span>' + e.label +
+        (e.sub ? '<small>' + e.sub + '</small>' : '') + '</span></label>').join("") +
+      '</div>').join("") +
+      '<div class="ms-foot"><button type="button" class="linkbtn" id="ms-clear">Togli tutto</button><button type="button" class="btn btn-main" id="ms-done">Fatto</button></div>';
+
+    // Sposta i pannelli dal template in un contenitore nascosto, pronti per essere mostrati
+    const tpl = $("#tpl-panels").content;
+    tpl.querySelectorAll(".xp").forEach(p => { p.hidden = true; xpsEl.appendChild(p); });
+  })();
+
+  function apriMs(open) {
+    msPanel.hidden = !open;
+    msBtn.setAttribute("aria-expanded", open);
+    if (open) msPanel.querySelector("input").focus();
+  }
+  msBtn.addEventListener("click", () => apriMs(msPanel.hidden));
+  document.addEventListener("click", e => { if (!$("#ms").contains(e.target)) apriMs(false); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !msPanel.hidden) { apriMs(false); msBtn.focus(); } });
+  msPanel.addEventListener("change", e => { if (e.target.type === "checkbox") setExtra(e.target.value, e.target.checked); });
+  $("#ms-done").addEventListener("click", () => { apriMs(false); msBtn.focus(); });
+  $("#ms-clear").addEventListener("click", () => EXTRAS.forEach(e => setExtra(e.id, false)));
+
+  function setExtra(id, on) {
+    on ? state.extras.add(id) : state.extras.delete(id);
+    msPanel.querySelector('input[value="' + id + '"]').checked = on;
+    renderExtras();
+  }
+
+  function renderExtras() {
+    const ids = EXTRAS.map(e => e.id).filter(id => state.extras.has(id));
+    msText.innerHTML = ids.length
+      ? (ids.length === 1 ? EXTRA[ids[0]].label : "Richieste selezionate") + '<span class="ms-count">' + ids.length + '</span>'
+      : "Nessuna richiesta";
+    tagsEl.innerHTML = ids.map(id => '<button type="button" class="tag" data-id="' + id + '" aria-label="Togli ' + EXTRA[id].label + '">' + EXTRA[id].label + ' <b aria-hidden="true">×</b></button>').join("");
+    xpsEl.querySelectorAll(".xp").forEach(p => { p.hidden = !state.extras.has(p.dataset.for); });
+    xpsEl.hidden = !ids.length;
+    $("#add-torta").hidden = state.extras.has("torta");
+    aggiorna();
+  }
+  tagsEl.addEventListener("click", e => { const t = e.target.closest(".tag"); if (t) setExtra(t.dataset.id, false); });
+  $("#add-torta").addEventListener("click", () => {
+    setExtra("torta", true);
+    const p = xpsEl.querySelector('[data-for="torta"]');
+    p.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" });
+  });
+
+  // ----- Validazione e riepilogo -----
+  function setErr(key, msg) {
+    const el = $("#err-" + key); if (el) el.textContent = msg;
+    const map = { data: "#data", nome: "#nome", telefono: "#telefono", allergie: "#allergie-txt" };
+    if (map[key]) $(map[key]).setAttribute("aria-invalid", msg ? "true" : "false");
+  }
+  const oraScelta = () => { const r = form.querySelector('input[name="ora"]:checked'); return r ? r.value : ""; };
+  const telOk = v => /^[0-9+\s]{8,16}$/.test(v.trim());
+  const dataOk = () => dataEl.value && dataEl.value >= iso(new Date()) && new Date(dataEl.value + "T12:00:00").getDay() !== 1;
+
+  function controlli() {
+    const c = [
+      { key: "data", ok: dataOk(), msg: "Scegli un giorno di apertura.", label: "giorno", el: dataEl },
+      { key: "ora", ok: !!oraScelta(), msg: "Scegli l’orario.", label: "ora", el: slotsEl },
+      { key: "nome", ok: !!$("#nome").value.trim(), msg: "Scrivi il tuo nome.", label: "nome", el: $("#nome") },
+      { key: "telefono", ok: telOk($("#telefono").value), msg: "Controlla il numero: solo cifre, spazi e +.", label: "telefono", el: $("#telefono") }
+    ];
+    if (state.extras.has("torta")) c.push({ key: "torta", ok: $("#torta-ok").checked, msg: "Conferma di aver letto le regole sulla torta.", label: "conferma regole torta", el: $("#torta-ok") });
+    if (state.extras.has("allergie")) c.push({ key: "allergie", ok: !!$("#allergie-txt").value.trim(), msg: "Scrivi quali allergie o intolleranze.", label: "dettagli allergie", el: $("#allergie-txt") });
+    c.push({ key: "privacy", ok: $("#privacy").checked, msg: "Serve il consenso per gestire la prenotazione.", label: "consenso privacy", el: $("#privacy") });
+    return c;
+  }
+
+  function aggiorna() {
+    const c = controlli(), fatti = c.filter(x => x.ok).length, pct = Math.round(fatti / c.length * 100);
+    $("#sum-bar").style.width = pct + "%";
+    $("#sum-pct").textContent = pct + "%";
+    $("#s-data").textContent = dataOk() ? new Date(dataEl.value + "T12:00:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" }) : "–";
+    $("#s-ora").textContent = oraScelta() || "–";
+    $("#s-persone").textContent = state.persone;
+    $("#s-nome").textContent = $("#nome").value.trim() || "–";
+    $("#s-extra").textContent = state.extras.size ? EXTRAS.filter(e => state.extras.has(e.id)).map(e => e.label).join(", ") : "Nessuna";
+    const manca = c.filter(x => !x.ok).map(x => x.label);
+    $("#s-miss").textContent = manca.length ? "Manca: " + manca.join(", ") + "." : "Tutto pronto: puoi inviare.";
+  }
+  form.addEventListener("input", e => {
+    const map = { nome: "nome", telefono: "telefono", "allergie-txt": "allergie", "torta-ok": "torta", privacy: "privacy" };
+    if (map[e.target.id]) setErr(map[e.target.id], "");
+    aggiorna();
+  });
+  form.addEventListener("change", aggiorna);
+
+  function mostra(titolo, testo, extraHTML) {
+    resultEl.innerHTML = "<strong></strong><span></span>" + (extraHTML || "");
+    resultEl.querySelector("strong").textContent = titolo;
+    resultEl.querySelector("span").textContent = testo;
+    resultEl.classList.add("show");
+  }
+
+  function coriandoli() {
+    if (reduce) return;
+    const r = inviaBtn.getBoundingClientRect(), colori = ["#F2B53A", "#B3261E", "#E9B7A9", "#FFF7EC", "#2E7D4F"];
+    for (let i = 0; i < 40; i++) {
+      const s = document.createElement("span");
+      s.className = "conf";
+      s.style.cssText = `left:${r.left + r.width / 2}px;top:${r.top}px;background:${colori[i % colori.length]};` +
+        `--dx:${(Math.random() * 320 - 160).toFixed(0)}px;--dy:${(-80 - Math.random() * 180).toFixed(0)}px;--r:${(Math.random() * 540).toFixed(0)}deg`;
+      s.addEventListener("animationend", () => s.remove());
+      document.body.appendChild(s);
+    }
+  }
+
+  function richiesteTesto() {
+    return EXTRAS.filter(e => state.extras.has(e.id)).map(e => {
+      let s = "- " + e.label;
+      if (e.id === "compleanno") {
+        const chi = $("#festeggiato").value.trim(), anni = $("#anni").value;
+        const det = [chi && "festeggia " + chi, anni && anni + " anni"].filter(Boolean).join(", ");
+        if (det) s += " (" + det + ")";
+      }
+      if (e.id === "torta") s += " (torta di pasticceria, porto scontrino ed elenco ingredienti)";
+      if (e.id === "seggiolone") s += ": " + $("#n-seggioloni").value;
+      if (e.id === "allergie") s += ": " + $("#allergie-txt").value.trim();
+      return s;
+    });
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const c = controlli();
+    c.forEach(x => setErr(x.key, x.ok ? "" : x.msg));
+    const primo = c.find(x => !x.ok);
+    if (primo) {
+      mostra("Manca qualcosa", "Controlla i campi segnati in rosso: " + c.filter(x => !x.ok).map(x => x.label).join(", ") + ".");
+      primo.el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+      if (primo.el.focus) primo.el.focus({ preventScroll: true });
+      return;
+    }
+
+    const extra = richiesteTesto();
+    const d = {
+      nome: $("#nome").value.trim(),
+      telefono: $("#telefono").value.trim(),
+      data: dataEl.value,
+      ora: oraScelta(),
+      persone: state.persone,
+      richieste: [...state.extras],
+      dettagliRichieste: extra,
+      note: $("#note").value.trim(),
+      origine: "sito"
+    };
+    const dataLeggibile = new Date(d.data + "T12:00:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+
+    const messaggio =
+      "Ciao " + CONFIG.nomeLocale + ", vorrei prenotare un tavolo.\n" +
+      "Nome: " + d.nome + "\n" +
+      "Telefono: " + d.telefono + "\n" +
+      "Giorno: " + dataLeggibile + "\n" +
+      "Ora: " + d.ora + "\n" +
+      "Persone: " + d.persone +
+      (extra.length ? "\nRichieste speciali:\n" + extra.join("\n") : "") +
+      (d.note ? "\nNote: " + d.note : "");
+
+    const linkWa = "https://wa.me/" + CONFIG.whatsapp + "?text=" + encodeURIComponent(messaggio);
+    const festa = state.extras.has("compleanno");
+
+    // Versione 2: invio a n8n
+    if (CONFIG.webhook) {
+      inviaBtn.disabled = true; inviaBtn.textContent = "Invio in corso…";
+      try {
+        const r = await fetch(CONFIG.webhook, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(d)
+        });
+        if (!r.ok) throw new Error(r.status);
+        mostra("Richiesta inviata", "Ti confermiamo il tavolo su WhatsApp al numero " + d.telefono + ".");
+        if (festa) coriandoli();
+        form.reset(); state.extras.clear();
+        msPanel.querySelectorAll("input").forEach(i => i.checked = false);
+        dataEl.dispatchEvent(new Event("change")); setPersone(2); renderExtras();
+      } catch (err) {
+        mostra("Invio non riuscito", "Puoi mandare la stessa richiesta su WhatsApp:",
+          ' <a href="' + linkWa + '" target="_blank" rel="noopener">apri WhatsApp</a>');
+      } finally {
+        inviaBtn.disabled = false; inviaBtn.textContent = "Invia la richiesta";
+      }
+      return;
+    }
+
+    // Versione 1: WhatsApp precompilato
+    window.open(linkWa, "_blank", "noopener");
+    if (festa) coriandoli();
+    mostra("Richiesta pronta su WhatsApp",
+      "Premi invio nella chat per mandarla. Se WhatsApp non si è aperto,",
+      ' <a href="' + linkWa + '" target="_blank" rel="noopener">aprilo da qui</a>.<pre></pre>');
+    resultEl.querySelector("pre").textContent = messaggio;
+  });
+
+  setPersone(2);
+  renderExtras();
+</script>
+</body>
+</html>
