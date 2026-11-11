@@ -334,6 +334,8 @@
   .slot input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
   .slot.piena span { opacity: .45; text-decoration: line-through; cursor: not-allowed; }
   .slot.piena span:hover { transform: none; border-color: var(--line); }
+  #slots[aria-busy="true"] { opacity: .55; }
+  #slots[aria-busy="true"]::after { content: "Controllo gli orari liberi…"; display: block; margin-top: .5rem; font-size: .87rem; color: var(--text-soft); }
   .slots-empty { color: var(--text-soft); font-size: .95rem; padding: .7rem 0; }
 
   .stepper { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 999px; background: var(--bg); width: max-content; }
@@ -1280,77 +1282,68 @@ ${pecorino}${chili}${pepe}
     disponibilita();
   });
 
-  // Chiamata JSONP: consente di leggere gli slot pubblici da Apps Script senza CORS.
-  function richiestaJsonp(url, timeoutMs = 10000) {
-    return new Promise((resolve, reject) => {
-      const callback = "__aleJsonp_" + Date.now() + "_" + Math.random().toString(36).slice(2);
-      const script = document.createElement("script");
-      let conclusa = false;
-      const timer = setTimeout(() => termina(new Error("Tempo scaduto nella comunicazione con il gestionale.")), timeoutMs);
-      function termina(err, dato) {
-        if (conclusa) return;
-        conclusa = true;
-        clearTimeout(timer);
-        script.onerror = null;
-        script.remove();
-        try { delete window[callback]; } catch (_) { window[callback] = undefined; }
-        if (err) reject(err); else resolve(dato);
-      }
-      window[callback] = dato => termina(null, dato);
-      script.onerror = () => termina(new Error("Non riesco a raggiungere il gestionale."));
-      script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + encodeURIComponent(callback);
-      document.head.appendChild(script);
-    });
+  // Disponibilità. Il gestionale risponde con tutti i giorni richiesti e tutte le dimensioni di tavolo
+  // in una sola chiamata: la carico all'apertura della pagina, così scegliere giorno e persone è immediato.
+  // Uso fetch (non <script>/JSONP): fetch non invia i cookie di Google, quindi la richiesta resta anonima
+  // anche se chi naviga ha più account Google aperti nel browser.
+  const DISP = {};      // { "2026-11-12": { t: quando l'ho letta, piene: { 1: ["20:30", …], 2: […], … } } }
+  const inArrivo = {};  // richieste in corso, per non farle due volte
+  function caricaDisp(giorni) {
+    const chiave = giorni.join(",");
+    if (!inArrivo[chiave]) {
+      inArrivo[chiave] = fetch(CONFIG.webhook + "?action=disp&giorni=" + chiave)
+        .then(r => r.json())
+        .then(j => {
+          if (!j.ok) throw new Error(j.motivo || "risposta non valida");
+          Object.keys(j.giorni).forEach(g => { DISP[g] = { t: Date.now(), piene: j.giorni[g] }; });
+        })
+        .finally(() => { delete inArrivo[chiave]; });
+    }
+    return inArrivo[chiave];
   }
-
-  // Orari al completo: il backend restituisce soltanto gli slot, senza dati dei clienti.
-  let richiestaSlot = 0;
+  function bloccaOrari(msg) {
+    slotsEl.querySelectorAll("input").forEach(i => { i.disabled = true; i.checked = false; });
+    setErr("ora", msg);
+    aggiorna();
+  }
+  function applicaDisp() {
+    const d = DISP[dataEl.value];
+    if (!d) return;
+    const piene = d.piene[state.persone] || [];
+    slotsEl.querySelectorAll("input").forEach(i => {
+      const piena = piene.indexOf(i.value) >= 0;
+      i.disabled = piena;
+      if (piena && i.checked) i.checked = false;
+      i.parentElement.classList.toggle("piena", piena);
+      i.parentElement.title = piena ? "Al completo per " + state.persone + (state.persone === 1 ? " persona" : " persone") : "";
+    });
+    setErr("ora", slotsEl.querySelector("input:not(:disabled)") ? "" : "Per questo giorno siamo al completo. Prova un altro giorno o chiamaci al " + CONFIG.telefonoLocale + ".");
+    aggiorna();
+  }
   async function disponibilita() {
     if (!dataEl.value || !slotsEl.querySelector("input")) return;
-    const n = ++richiestaSlot;
-    if (!CONFIG.webhook) {
-      slotsEl.querySelectorAll("input").forEach(i => i.disabled = true);
-      setErr("ora", "Le prenotazioni online non sono momentaneamente disponibili.");
-      aggiorna();
-      return;
-    }
+    if (!CONFIG.webhook) return bloccaOrari("Le prenotazioni online non sono momentaneamente disponibili.");
+    const giorno = dataEl.value, nota = DISP[giorno];
+    if (nota) applicaDisp();                               // subito, con quello che so già
+    else { bloccaOrari(""); slotsEl.setAttribute("aria-busy", "true"); }
+    if (nota && Date.now() - nota.t < 60000) return;       // letta meno di un minuto fa: basta così
     try {
-      const qs = new URLSearchParams({ action: "slot", data: dataEl.value, persone: String(state.persone) });
-      const j = await richiestaJsonp(CONFIG.webhook + "?" + qs.toString());
-      if (n !== richiestaSlot) return;
-      if (!j || !j.ok) throw new Error(j && j.motivo ? j.motivo : "Disponibilità non verificabile.");
-      slotsEl.querySelectorAll("input").forEach(i => {
-        const piena = j.piene.indexOf(i.value) >= 0;
-        i.disabled = piena;
-        if (piena && i.checked) i.checked = false;
-        i.parentElement.classList.toggle("piena", piena);
-        i.parentElement.title = piena ? "Al completo per " + state.persone + (state.persone === 1 ? " persona" : " persone") : "";
-      });
-      setErr("ora", slotsEl.querySelector("input:not(:disabled)") ? "" : "Per questo giorno siamo al completo. Prova un altro giorno o chiamaci al " + CONFIG.telefonoLocale + ".");
-      aggiorna();
+      await caricaDisp([giorno]);
+      if (dataEl.value === giorno) applicaDisp();
     } catch (err) {
-      if (n !== richiestaSlot) return;
-      // In caso di errore non lasciamo selezionare orari che non siamo riusciti a verificare.
-      slotsEl.querySelectorAll("input").forEach(i => i.disabled = true);
-      setErr("ora", "Non riusciamo a verificare la disponibilità. Ricarica la pagina e riprova.");
-      aggiorna();
+      console.error("Disponibilità non letta:", err);
+      if (dataEl.value === giorno && !DISP[giorno]) {
+        const perche = err instanceof TypeError ? "il gestionale non è raggiungibile" : err.message;
+        bloccaOrari("Non riusciamo a verificare la disponibilità (" + perche + "). Riprova tra poco o chiamaci al " + CONFIG.telefonoLocale + ".");
+      }
+    } finally {
+      if (dataEl.value === giorno) slotsEl.removeAttribute("aria-busy");
     }
   }
-
-  // Dopo il POST (inviato senza leggere la risposta cross-origin), recupero l'esito tramite token.
-  async function attendiEsitoPrenotazione(token) {
-    const scadenza = Date.now() + 18000;
-    while (Date.now() < scadenza) {
-      try {
-        const qs = new URLSearchParams({ action: "esito", token: token });
-        const j = await richiestaJsonp(CONFIG.webhook + "?" + qs.toString(), 7000);
-        if (j && j.pending === false) return j.result;
-      } catch (err) {
-        // Riprova: il backend potrebbe essere ancora occupato o la risposta temporaneamente non disponibile.
-      }
-      await new Promise(resolve => setTimeout(resolve, 600));
-    }
-    throw new Error("Il gestionale non ha restituito l'esito entro il tempo previsto.");
+  // Precarico i prossimi giorni appena si apre la pagina (serve anche a "svegliare" il gestionale)
+  if (CONFIG.webhook) {
+    const prossimi = [...document.querySelectorAll("#quick-dates .chip")].map(c => c.dataset.value);
+    if (prossimi.length) caricaDisp(prossimi).then(applicaDisp).catch(err => console.error("Precarico non riuscito:", err));
   }
   slotsEl.addEventListener("change", () => { setErr("ora", ""); aggiorna(); });
 
@@ -1531,29 +1524,21 @@ ${pecorino}${chili}${pepe}
       return;
     }
 
-    // Token casuale per recuperare dal backend l'esito senza leggere direttamente la risposta CORS.
-    d.clientToken = "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 14);
     d.sito_web = $("#sito_web").value; // campo trappola antispam: deve rimanere vuoto.
 
     inviaBtn.disabled = true;
     inviaBtn.textContent = "Invio in corso…";
-    let postCompletato = false;
     try {
-      // text/plain è una richiesta semplice; no-cors evita il blocco di lettura CORS di Apps Script.
-      await fetch(CONFIG.webhook, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=UTF-8" },
-        body: JSON.stringify(d)
-      });
-      postCompletato = true;
-
-      const esito = await attendiEsitoPrenotazione(d.clientToken);
-      if (!esito || !esito.ok) {
-        mostra("Prenotazione non registrata", esito && esito.motivo ? esito.motivo : "Non siamo riusciti a registrare la prenotazione. Riprova.");
-        disponibilita();
+      // Una sola andata e ritorno: invio e leggo subito l'esito.
+      // Nessuna intestazione personalizzata: così per il browser è una richiesta "semplice" e Apps Script la accetta.
+      const r = await fetch(CONFIG.webhook, { method: "POST", body: JSON.stringify(d) });
+      const esito = await r.json();
+      if (!esito.ok) {
+        mostra("Prenotazione non registrata", esito.motivo || "Non siamo riusciti a registrare la prenotazione. Riprova.");
+        delete DISP[d.data]; disponibilita();
         return;
       }
+      if (esito.piene) DISP[d.data] = { t: Date.now(), piene: esito.piene }; // disponibilità già aggiornata
 
       if (esito.stato === "confermata") {
         mostra("Prenotazione confermata", "Ti aspettiamo " + dataLeggibile + " alle " + d.ora + ", per " + d.persone + (d.persone === 1 ? " persona" : " persone") + ". Codice prenotazione: " + esito.id + ".");
@@ -1569,11 +1554,8 @@ ${pecorino}${chili}${pepe}
       setPersone(2);
       renderExtras();
     } catch (err) {
-      if (postCompletato) {
-        mostra("Invio effettuato, conferma non verificata", "Il sistema ha ricevuto l'invio, ma non siamo riusciti a leggere l'esito. Per evitare una doppia prenotazione, non inviare subito una seconda richiesta: contatta il locale per verificare.");
-      } else {
-        mostra("Invio non riuscito", "Non siamo riusciti a raggiungere il sistema di prenotazione. Controlla la connessione e riprova.");
-      }
+      console.error("Invio non riuscito:", err);
+      mostra("Invio non riuscito", "Non siamo riusciti a raggiungere il sistema di prenotazione. Riprova: se la richiesta era già arrivata non verrà registrata due volte.");
     } finally {
       inviaBtn.disabled = false;
       inviaBtn.textContent = "Prenota";
