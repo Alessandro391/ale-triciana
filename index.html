@@ -332,6 +332,8 @@
   .slot span:hover { transform: translateY(-2px); border-color: var(--pomodoro); }
   .slot input:checked + span { background: var(--btn-bg); border-color: var(--btn-bg); color: #fff; }
   .slot input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .slot.piena span { opacity: .45; text-decoration: line-through; cursor: not-allowed; }
+  .slot.piena span:hover { transform: none; border-color: var(--line); }
   .slots-empty { color: var(--text-soft); font-size: .95rem; padding: .7rem 0; }
 
   .stepper { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 999px; background: var(--bg); width: max-content; }
@@ -836,6 +838,7 @@
           </label>
           <span class="err" id="err-privacy"></span>
         </div>
+        <input type="text" id="sito_web" name="sito_web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
         <button class="btn btn-main" type="submit" id="invia">Invia la richiesta</button>
         <div class="result" id="result" role="status" aria-live="polite"></div>
       </form>
@@ -950,8 +953,9 @@
 <script>
   // ===== CONFIGURAZIONE =====
   // whatsapp: numero del locale, senza + e senza spazi. Per le prove metti il tuo.
-  // webhook: lascia vuoto per usare WhatsApp. Se inserisci l'URL del webhook n8n,
-  // la prenotazione viene inviata a n8n (che può salvarla e avvisare il locale).
+  // webhook: indirizzo dell'app Apps Script del locale (finisce con /exec).
+  // Se è compilato, le prenotazioni finiscono nel Google Sheet e gli orari pieni vengono disattivati.
+  // Se è vuoto, il sito usa WhatsApp come prima.
   const CONFIG = {
     nomeLocale: "Ale Triciana",
     whatsapp: "393276853015",
@@ -1277,7 +1281,29 @@ ${pecorino}${chili}${pepe}
       gr.times.map(t => '<label class="slot"><input type="radio" name="ora" value="' + t + '"><span>' + t + '</span></label>').join("") +
       '</div></div>').join("");
     aggiorna();
+    disponibilita();
   });
+
+  // Orari al completo: li chiedo al gestionale del locale e li disattivo
+  let richiestaSlot = 0;
+  async function disponibilita() {
+    if (!CONFIG.webhook || !dataEl.value || !slotsEl.querySelector("input")) return;
+    const n = ++richiestaSlot;
+    try {
+      const r = await fetch(CONFIG.webhook + "?action=slot&data=" + dataEl.value + "&persone=" + state.persone);
+      const j = await r.json();
+      if (n !== richiestaSlot || !j.ok) return;
+      slotsEl.querySelectorAll("input").forEach(i => {
+        const piena = j.piene.indexOf(i.value) >= 0;
+        i.disabled = piena;
+        if (piena && i.checked) i.checked = false;
+        i.parentElement.classList.toggle("piena", piena);
+        i.parentElement.title = piena ? "Al completo per " + state.persone + (state.persone === 1 ? " persona" : " persone") : "";
+      });
+      setErr("ora", slotsEl.querySelector("input:not(:disabled)") ? "" : "Per questo giorno siamo al completo. Prova un altro giorno o chiamaci al " + CONFIG.telefonoLocale + ".");
+      aggiorna();
+    } catch (e) { /* se il gestionale non risponde, lascio tutti gli orari selezionabili */ }
+  }
   slotsEl.addEventListener("change", () => { setErr("ora", ""); aggiorna(); });
 
   // Persone
@@ -1288,6 +1314,7 @@ ${pecorino}${chili}${pepe}
     meno.disabled = state.persone <= 1; piu.disabled = state.persone >= CONFIG.maxPersone;
     personeHint.textContent = state.persone >= CONFIG.maxPersone ? "Siete più di " + CONFIG.maxPersone + "? Chiamaci al " + CONFIG.telefonoLocale + ", così vi prepariamo il tavolo giusto." : "";
     aggiorna();
+    disponibilita();
   }
   meno.addEventListener("click", () => setPersone(state.persone - 1));
   piu.addEventListener("click", () => setPersone(state.persone + 1));
@@ -1463,17 +1490,24 @@ ${pecorino}${chili}${pepe}
     const linkWa = "https://wa.me/" + CONFIG.whatsapp + "?text=" + encodeURIComponent(messaggio);
     const festa = state.extras.has("compleanno");
 
-    // Versione 2: invio a n8n
+    // Invio al gestionale del locale: la prenotazione finisce nel Google Sheet
     if (CONFIG.webhook) {
       inviaBtn.disabled = true; inviaBtn.textContent = "Invio in corso…";
       try {
-        const r = await fetch(CONFIG.webhook, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(d)
-        });
-        if (!r.ok) throw new Error(r.status);
-        mostra("Richiesta inviata", "Ti confermiamo il tavolo su WhatsApp al numero " + d.telefono + ".");
+        d.sito_web = $("#sito_web").value; // campo trappola: le persone non lo vedono, i bot lo compilano
+        // Nessuna intestazione personalizzata: Apps Script accetta solo richieste "semplici" dal browser
+        const r = await fetch(CONFIG.webhook, { method: "POST", body: JSON.stringify(d) });
+        const j = await r.json();
+        if (!j.ok) {
+          mostra("Prenotazione non registrata", j.motivo || "Riprova tra qualche secondo.");
+          disponibilita();
+          return;
+        }
+        if (j.stato === "confermata") {
+          mostra("Prenotazione confermata", "Ti aspettiamo " + dataLeggibile + " alle " + d.ora + ", tavolo per " + d.persone + ". Codice prenotazione: " + j.id + ".");
+        } else {
+          mostra("Richiesta ricevuta", "Per " + dataLeggibile + " alle " + d.ora + " dobbiamo verificare il tavolo: ti scriviamo su WhatsApp al " + d.telefono + " per confermare.");
+        }
         if (festa) coriandoli();
         form.reset(); state.extras.clear();
         msPanel.querySelectorAll("input").forEach(i => i.checked = false);
