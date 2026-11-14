@@ -151,10 +151,30 @@
   }
   .hero p.lead { font-size: 1.2rem; max-width: 34ch; margin: 0 0 2rem; }
   .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; }
+  /* Le tre azioni principali: grandi, subito visibili, un tocco porta al form giusto */
+  .azioni-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; max-width: 640px; }
+  .az { display: flex; flex-direction: column; gap: .45rem; padding: 1rem 1rem 1.05rem; border-radius: 20px; text-decoration: none; color: var(--pomodoro);
+    background: rgba(255, 255, 255, .92); box-shadow: inset 0 1px 0 #fff, 0 12px 26px -12px rgba(0,0,0,.45); transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
+  .az:hover { transform: translateY(-3px); box-shadow: inset 0 1px 0 #fff, 0 18px 32px -12px rgba(0,0,0,.5); }
+  .az:active { transform: scale(.98); }
+  .az .ico { font-size: 1.7rem; line-height: 1; }
+  .az b { display: block; font-size: 1.12rem; line-height: 1.2; color: #2A2421; }
+  .az .ico { display: grid; place-items: center; width: 2.9rem; height: 2.9rem; border-radius: 14px; background: #FDE8E4; flex: none; }
+  .az::after { content: "→"; align-self: flex-end; margin-top: auto; font-weight: 700; font-size: 1.2rem; color: var(--pomodoro); transition: transform .2s var(--ease); }
+  .az:hover::after { transform: translateX(4px); }
+  /* Prima schermata: in evidenza le tre azioni, il titolo fa da cornice, le pizze sono piccole */
+  .hero h1 { font-size: clamp(2.2rem, 4.4vw, 3.5rem); margin-bottom: .8rem; }
+  .hero p.lead { font-size: 1.08rem; margin-bottom: 1.5rem; max-width: 44ch; }
+  .hero-grid { grid-template-columns: 1.35fr .65fr; padding-block: 2.2rem 3.4rem; }
+  .pizzas { max-width: 300px; padding: 1.1rem 1.1rem 1.5rem; }
+  .pz:nth-child(even) { margin-top: 1rem; }
+  .pizzas .pz-tip { display: none; }
+  .pizzas .pz-name { font-size: .95rem; margin-top: .35rem; }
+  .az small { display: block; margin-top: .2rem; font-size: .82rem; color: #6A5C55; }
   .hero-hint { margin: 1.4rem 0 0; font-size: .9rem; opacity: .8; }
 
   /* ---------- Le quattro pizze ---------- */
-  .pizzas { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.6rem; }
+  .pizzas { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem 1.1rem; max-width: 340px; margin-left: auto; }
   .pz {
     display: block; width: 100%; background: none; border: 0; padding: 0;
     color: inherit; font: inherit; text-align: center; cursor: pointer;
@@ -458,16 +478,21 @@
     .nav a:not(.nav-cta) { display: none; }
     .hero-grid, .menu-grid, .info-grid, .booking-grid { grid-template-columns: 1fr; }
     .hero-grid { padding-block: 1.5rem 4rem; gap: 2.5rem; }
-    .pizzas { max-width: 420px; }
+    .pizzas { max-width: 420px; margin-left: 0; }
     .pz-tip { opacity: .85; transform: none; }
     .hero h1 { font-size: clamp(2.2rem, 10vw, 2.8rem); }
     .hero p.lead { font-size: 1.05rem; margin-bottom: 1.4rem; }
-    .hero-actions .btn { flex: 1 1 0; text-align: center; padding: .95rem .8rem; }
+    .azioni-top { grid-template-columns: 1fr; gap: .55rem; }
+    .az { flex-direction: row; align-items: center; gap: .9rem; padding: .8rem 1rem; border-radius: 18px; }
+    .az .ico { font-size: 1.5rem; width: 2.6rem; height: 2.6rem; }
+    .az::after { align-self: center; margin-top: 0; margin-left: auto; }
+    .hero-grid { grid-template-columns: 1fr; }
     /* le quattro pizze in una fila che si scorre col dito */
     .pizzas { display: flex; gap: .9rem; max-width: none; overflow-x: auto; scroll-snap-type: x mandatory;
       padding: 1rem 1rem 1.2rem; margin-inline: -.25rem; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .pizzas::-webkit-scrollbar { display: none; }
-    .pz { flex: 0 0 42%; scroll-snap-align: start; }
+    .pz { flex: 0 0 30%; scroll-snap-align: start; }
+    .pizzas .pz-tip { display: none; }
     .pz:nth-child(even) { margin-top: 0; }
     .pz-name { font-size: 1rem; }
     .pz-tip { font-size: .78rem; }
@@ -700,6 +725,14 @@
   .pag:has(input:checked) { border-color: var(--pomodoro); }
   .pag.off { opacity: .55; cursor: not-allowed; }
   #ordine .btn-main { justify-self: start; }
+  .pre { border: 1.5px dashed var(--glass-edge); border-radius: 14px; padding: .2rem .9rem; background: var(--field-bg); }
+  .pre[open] { padding-bottom: .9rem; }
+  .pre summary { cursor: pointer; display: flex; justify-content: space-between; gap: .8rem; align-items: center; padding: .7rem 0; list-style: none; }
+  .pre summary::-webkit-details-marker { display: none; }
+  .pre summary::after { content: "+"; font-weight: 700; font-size: 1.3rem; color: var(--warn); }
+  .pre[open] summary::after { content: "−"; }
+  .pre summary .opt { display: block; font-size: .85rem; }
+  .pre-tot { margin-left: auto; font-weight: 700; color: var(--warn); white-space: nowrap; }
   @media (max-width: 820px) {
     .order-grid { grid-template-columns: 1fr; }
     .modi { display: grid; grid-template-columns: repeat(3, 1fr); border-radius: 999px; }
@@ -731,9 +764,10 @@
       <div>
         <h1>Le quattro romane, su una pizza.</h1>
         <p class="lead">Pizzeria a Ciampino. Carbonara, amatriciana, gricia e cacio e pepe, cotte in pala come si deve.</p>
-        <div class="hero-actions">
-          <a class="btn btn-light" href="#prenota" data-vai="tavolo">Prenota un tavolo</a>
-          <a class="btn btn-ghost" href="#prenota" data-vai="consegna">Ordina a casa</a>
+        <div class="hero-actions azioni-top">
+          <a class="az" href="#prenota" data-vai="tavolo"><span class="ico" aria-hidden="true">🍽️</span><span><b>Prenota un tavolo</b><small>Scegli l’ora, ci pensiamo noi</small></span></a>
+          <a class="az" href="#prenota" data-vai="consegna"><span class="ico" aria-hidden="true">🛵</span><span><b>Consegna a domicilio</b><small>A Ciampino, calde a casa tua</small></span></a>
+          <a class="az" href="#prenota" data-vai="asporto"><span class="ico" aria-hidden="true">🥡</span><span><b>Asporto</b><small>Dal lunedì al venerdì</small></span></a>
         </div>
         <p class="hero-hint" id="hero-hint">Passa sopra una pizza per vedere cosa c’è sopra. Cliccala per trovarla nel menu.</p>
       </div>
@@ -873,6 +907,7 @@
             <div><dt>Persone</dt><dd id="s-persone">2</dd></div>
             <div><dt>Nome</dt><dd id="s-nome">–</dd></div>
             <div><dt>Richieste</dt><dd id="s-extra">Nessuna</dd></div>
+            <div><dt>Ordine</dt><dd id="s-pre">Nessuno (facoltativo)</dd></div>
           </dl>
           <p class="sum-miss" id="s-miss"></p>
         </aside>
@@ -905,6 +940,13 @@
           <span class="hint" id="persone-hint"></span>
         </div>
 
+        <div class="field full">
+          <details class="pre" id="pre-box">
+            <summary><span><b>Vuoi già scegliere cosa mangiare?</b> <span class="opt">Facoltativo: la cucina lo sa prima e al tavolo aspetti meno.</span></span><span class="pre-tot" id="pre-tot"></span></summary>
+            <div class="menu-ord" id="menu-pre"></div>
+          </details>
+        </div>
+
         <div class="field">
           <label for="nome">Nome</label>
           <input id="nome" name="nome" autocomplete="name">
@@ -934,13 +976,7 @@
           <label for="note">Note (facoltative)</label>
           <textarea id="note" name="note" placeholder="Qualsiasi altra cosa che dobbiamo sapere…"></textarea>
         </div>
-        <div class="field full">
-          <label class="consent">
-            <input type="checkbox" id="privacy">
-            <span>Acconsento all’uso di nome e telefono solo per gestire questa prenotazione. <a href="#privacy-info">Informativa privacy</a></span>
-          </label>
-          <span class="err" id="err-privacy"></span>
-        </div>
+        <p class="field full hint">Usiamo nome e telefono solo per gestire questa prenotazione. <a href="#privacy-info">Informativa privacy</a></p>
         <input type="text" id="sito_web" name="sito_web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
         <button class="btn btn-main" type="submit" id="invia">Prenota</button>
         <div class="result" id="result" role="status" aria-live="polite"></div>
@@ -1003,8 +1039,7 @@
 
         <div class="field full"><label for="o-note">Note <span class="opt">(facoltative)</span></label><textarea id="o-note" placeholder="Allergie, senza cipolla, suona due volte…"></textarea></div>
         <div class="field full">
-          <label class="consent"><input type="checkbox" id="o-privacy"><span>Acconsento all’uso dei miei dati (nome, telefono e, per la consegna, indirizzo) solo per gestire questo ordine. <a href="#privacy-info">Informativa privacy</a></span></label>
-          <span class="err" id="err-o-privacy"></span>
+          <p class="hint">Usiamo i tuoi dati (nome, telefono e, per la consegna, indirizzo) solo per gestire questo ordine. <a href="#privacy-info">Informativa privacy</a></p>
         </div>
         <input type="text" id="o-sito_web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
         <button class="btn btn-main" type="submit" id="o-invia">Invia ordine</button>
@@ -1398,6 +1433,7 @@ ${pecorino}${chili}${pepe}
   const dataEl = $("#data"), hintEl = $("#data-hint"), slotsEl = $("#slots");
   const resultEl = $("#result"), inviaBtn = $("#invia");
   const state = { persone: 2, extras: new Set() };
+  var PRE = {}; // cosa mangeranno, scelto in prenotazione (facoltativo): { id: quantità }
 
   dataEl.min = iso(new Date());
 
@@ -1425,6 +1461,7 @@ ${pecorino}${chili}${pepe}
       b.textContent = i === 0 ? "Oggi" : i === 1 ? "Domani" : d.toLocaleDateString("it-IT", { weekday: "short", day: "numeric" });
       b.addEventListener("click", () => { dataEl.value = v; dataEl.dispatchEvent(new Event("change")); });
       box.appendChild(b); n++;
+      if (n === 1 && !dataEl.value) setTimeout(() => b.click(), 0); // il primo giorno libero è già scelto
     }
   })();
 
@@ -1652,7 +1689,6 @@ ${pecorino}${chili}${pepe}
     ];
     if (state.extras.has("torta")) c.push({ key: "torta", ok: $("#torta-ok").checked, msg: "Conferma di aver letto le regole sulla torta.", label: "conferma regole torta", el: $("#torta-ok") });
     if (state.extras.has("allergie")) c.push({ key: "allergie", ok: !!$("#allergie-txt").value.trim(), msg: "Scrivi quali allergie o intolleranze.", label: "dettagli allergie", el: $("#allergie-txt") });
-    c.push({ key: "privacy", ok: $("#privacy").checked, msg: "Serve il consenso per gestire la prenotazione.", label: "consenso privacy", el: $("#privacy") });
     return c;
   }
 
@@ -1665,11 +1701,12 @@ ${pecorino}${chili}${pepe}
     $("#s-persone").textContent = state.persone;
     $("#s-nome").textContent = $("#nome").value.trim() || "–";
     $("#s-extra").textContent = state.extras.size ? EXTRAS.filter(e => state.extras.has(e.id)).map(e => e.label).join(", ") : "Nessuna";
+    $("#s-pre").textContent = testoPre();
     const manca = c.filter(x => !x.ok).map(x => x.label);
     $("#s-miss").textContent = manca.length ? "Manca: " + manca.join(", ") + "." : "Tutto pronto: puoi prenotare.";
   }
   form.addEventListener("input", e => {
-    const map = { nome: "nome", telefono: "telefono", "allergie-txt": "allergie", "torta-ok": "torta", privacy: "privacy" };
+    const map = { nome: "nome", telefono: "telefono", "allergie-txt": "allergie", "torta-ok": "torta" };
     if (map[e.target.id]) setErr(map[e.target.id], "");
     aggiorna();
   });
@@ -1732,7 +1769,8 @@ ${pecorino}${chili}${pepe}
       richieste: [...state.extras],
       dettagliRichieste: extra,
       note: $("#note").value.trim(),
-      origine: "sito"
+      origine: "sito",
+      preordine: Object.keys(PRE).map(id => ({ id: id, qta: PRE[id] }))
     };
     const dataLeggibile = new Date(d.data + "T12:00:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
 
@@ -1757,18 +1795,21 @@ ${pecorino}${chili}${pepe}
       if (esito.piene) DISP[d.data] = { t: Date.now(), piene: esito.piene }; // disponibilità già aggiornata
 
       if (esito.stato === "confermata") {
-        mostra("Prenotazione confermata", "Ti aspettiamo " + dataLeggibile + " alle " + d.ora + ", per " + d.persone + (d.persone === 1 ? " persona" : " persone") + ". Codice prenotazione: " + esito.id + ".");
+        mostra("Prenotazione confermata", "Ti aspettiamo " + dataLeggibile + " alle " + d.ora + ", per " + d.persone + (d.persone === 1 ? " persona" : " persone") + "." +
+          (d.preordine.length ? " Il tuo ordine (" + testoPre() + ") è già in cucina." : "") + " Codice prenotazione: " + esito.id + ".");
       } else {
         mostra("Richiesta ricevuta", "La richiesta è stata salvata, ma il sistema deve verificare l'assegnazione del tavolo. Il locale ti ricontatterà al numero indicato per confermare.");
       }
 
       coriandoli(); // festa a ogni prenotazione andata a buon fine, qualsiasi giorno
-      form.reset();
+      ricordaCliente($("#nome").value.trim(), $("#telefono").value.trim());
+      form.reset(); azzeraPre(); compilaCliente();
       state.extras.clear();
       msPanel.querySelectorAll("input").forEach(i => i.checked = false);
       dataEl.dispatchEvent(new Event("change"));
       setPersone(2);
       renderExtras();
+      const primoGiorno = $("#quick-dates .chip"); if (primoGiorno) primoGiorno.click(); // pronto per un'altra prenotazione
     } catch (err) {
       console.warn("Invio non riuscito:", err && err.message);
       mostra("Invio non riuscito", "Non siamo riusciti a raggiungere il sistema di prenotazione. Riprova: se la richiesta era già arrivata non verrà registrata due volte.");
@@ -1945,7 +1986,6 @@ ${pecorino}${chili}${pepe}
     if (!$("#o-nome").value.trim()) e.push(["o-nome", "Scrivi il tuo nome.", $("#o-nome")]);
     if (!/^[0-9+\s]{8,16}$/.test($("#o-tel").value.trim())) e.push(["o-tel", "Controlla il numero: solo cifre, spazi e +.", $("#o-tel")]);
     if (cons && $("#o-via").value.trim().length < 5) e.push(["o-via", "Scrivi via e numero civico.", $("#o-via")]);
-    if (!$("#o-privacy").checked) e.push(["o-privacy", "Serve il consenso per gestire l’ordine.", $("#o-privacy")]);
     return { e, c, ora };
   }
   function mostraO(titolo, testo) {
@@ -1953,10 +1993,10 @@ ${pecorino}${chili}${pepe}
     oResult.querySelector("strong").textContent = titolo; oResult.querySelector("span").textContent = testo;
     oResult.classList.add("show");
   }
-  formOrd.addEventListener("input", e => { const k = { "o-nome": "o-nome", "o-tel": "o-tel", "o-via": "o-via", "o-privacy": "o-privacy" }[e.target.id]; if (k) errO(k, ""); });
+  formOrd.addEventListener("input", e => { const k = { "o-nome": "o-nome", "o-tel": "o-tel", "o-via": "o-via" }[e.target.id]; if (k) errO(k, ""); });
   formOrd.addEventListener("submit", async e => {
     e.preventDefault();
-    ["o-data", "o-ora", "o-righe", "o-nome", "o-tel", "o-via", "o-privacy"].forEach(k => errO(k, ""));
+    ["o-data", "o-ora", "o-righe", "o-nome", "o-tel", "o-via"].forEach(k => errO(k, ""));
     const { e: errori, c, ora } = controlliOrdine();
     if (errori.length) {
       errori.forEach(([k, m]) => errO(k, m));
@@ -1982,7 +2022,8 @@ ${pecorino}${chili}${pepe}
       mostraO("Ordine ricevuto", (cons ? "Te lo portiamo " + quando + " verso le " + d.ora + ", a " + d.indirizzo + ". " : "Ti aspettiamo per il ritiro " + quando + " alle " + d.ora + ". ") +
         "Totale " + euro(Number(esito.totale)) + ", da pagare " + (cons ? "al rider" : "in cassa") + ". Codice ordine: " + esito.id + ".");
       coriandoli();
-      ord.qta = {}; formOrd.reset();
+      ricordaCliente(d.nome, d.telefono, d.indirizzo, d.citofono);
+      ord.qta = {}; formOrd.reset(); compilaCliente();
       document.querySelectorAll(".riga-ord").forEach(rg => { rg.classList.remove("scelta"); rg.querySelector("output").textContent = 0; rg.querySelector('[data-d="-1"]').disabled = true; });
       $("#o-comune").value = ORDINI.comuni[0];
       oData.dispatchEvent(new Event("change")); aggiornaCarrello();
@@ -1994,6 +2035,67 @@ ${pecorino}${chili}${pepe}
     }
   });
   aggiornaCarrello();
+
+  /* ---------- Prenota e scegli già cosa mangiare ---------- */
+  function testoPre() {
+    const ids = Object.keys(PRE);
+    if (!ids.length) return "Nessuno (facoltativo)";
+    const tot = ids.reduce((s, id) => s + LISTINO.find(p => p.id === id).prezzo * PRE[id], 0);
+    const pezzi = ids.reduce((s, id) => s + PRE[id], 0);
+    return pezzi + (pezzi === 1 ? " piatto" : " piatti") + " · " + euro(tot);
+  }
+  (function menuPre() {
+    const gruppi = [...new Set(LISTINO.map(p => p.g))];
+    $("#menu-pre").innerHTML = gruppi.map(g => "<div><h4>" + g + "</h4>" + LISTINO.filter(p => p.g === g).map(p =>
+      '<div class="riga-ord" data-id="' + p.id + '"><span class="np">' + p.nome + '</span><span class="pr">' + euro(p.prezzo) + "</span>" +
+      '<span class="qta"><button type="button" data-d="-1" aria-label="Togli ' + p.nome + '" disabled>−</button><output>0</output><button type="button" data-d="1" aria-label="Aggiungi ' + p.nome + '">+</button></span></div>').join("") + "</div>").join("");
+  })();
+  $("#menu-pre").addEventListener("click", e => {
+    const b = e.target.closest("button[data-d]"); if (!b) return;
+    const riga = b.closest(".riga-ord"), id = riga.dataset.id;
+    PRE[id] = Math.max(0, Math.min(20, (PRE[id] || 0) + Number(b.dataset.d)));
+    if (!PRE[id]) delete PRE[id];
+    riga.querySelector("output").textContent = PRE[id] || 0;
+    riga.querySelector('[data-d="-1"]').disabled = !PRE[id];
+    riga.classList.toggle("scelta", !!PRE[id]);
+    $("#pre-tot").textContent = Object.keys(PRE).length ? testoPre() : "";
+    aggiorna();
+  });
+  function azzeraPre() {
+    PRE = {};
+    document.querySelectorAll("#menu-pre .riga-ord").forEach(r => { r.classList.remove("scelta"); r.querySelector("output").textContent = 0; r.querySelector('[data-d="-1"]').disabled = true; });
+    $("#pre-tot").textContent = ""; $("#pre-box").open = false; aggiorna();
+  }
+
+  /* ---------- Meno click: giorno e "prima possibile" già scelti negli ordini ---------- */
+  const scegliPrimo = () => {
+    if (ord.modo === "tavolo") return;
+    if (!oData.value) { const c = $("#o-giorni .chip:not([disabled])"); if (c) c.click(); }
+    const prima = oOre.querySelector('input[name="o-ora"]');
+    if (prima && !oOre.querySelector('input[name="o-ora"]:checked')) {
+      prima.checked = true;
+      prima.nextElementSibling.textContent = "Prima possibile · " + prima.value;
+    }
+  };
+  document.querySelectorAll(".modi button, [data-vai]").forEach(b => b.addEventListener("click", () => setTimeout(scegliPrimo, 0)));
+  oData.addEventListener("change", () => setTimeout(scegliPrimo, 0));
+
+  /* ---------- Cliente che torna: nome, telefono e indirizzo già compilati (salvati solo sul suo telefono) ---------- */
+  const CHIAVE_CLIENTE = "aleTriciana.cliente";
+  function leggiCliente() { try { return JSON.parse(localStorage.getItem(CHIAVE_CLIENTE) || "{}"); } catch (e) { return {}; } }
+  function ricordaCliente(nome, tel, via, cit) {
+    try {
+      const c = leggiCliente();
+      if (nome) c.nome = nome; if (tel) c.tel = tel; if (via) c.via = via; if (cit != null && via) c.cit = cit;
+      localStorage.setItem(CHIAVE_CLIENTE, JSON.stringify(c));
+    } catch (e) {}
+  }
+  function compilaCliente() {
+    const c = leggiCliente();
+    [["#nome", c.nome], ["#telefono", c.tel], ["#o-nome", c.nome], ["#o-tel", c.tel], ["#o-via", c.via], ["#o-cit", c.cit]].forEach(([s, v]) => { const el = $(s); if (el && v && !el.value) el.value = v; });
+    aggiorna();
+  }
+  compilaCliente();
 </script>
 </body>
 </html>
