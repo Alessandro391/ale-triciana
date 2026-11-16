@@ -1871,7 +1871,7 @@ ${pecorino}${chili}${pepe}
       await caricaGooglePlaces();
       const places = await google.maps.importLibrary("places");
       autocompleteIndirizzo = new places.PlaceAutocompleteElement({ includedRegionCodes: ["it"] });
-      autocompleteIndirizzo.placeholder = "Es. Via Achille Grandi 34, Ciampino";
+      autocompleteIndirizzo.placeholder = "Es. Via Roma 10, Ciampino";
       autocompleteIndirizzo.includedRegionCodes = ["it"];
       autocompleteIndirizzo.locationBias = { radius: 5500, center: { lat: 41.8008, lng: 12.6022 } };
       $("#o-via-autocomplete").replaceChildren(autocompleteIndirizzo);
