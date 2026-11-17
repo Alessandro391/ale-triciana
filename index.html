@@ -725,6 +725,11 @@
   .pag:has(input:checked) { border-color: var(--pomodoro); }
   .pag.off { opacity: .55; cursor: not-allowed; }
   #ordine .btn-main { justify-self: start; }
+  .indirizzo-google { width: 100%; min-height: 52px; border-radius: 12px; }
+  .indirizzo-google gmp-place-autocomplete { display: block; width: 100%; min-height: 52px; }
+  .indirizzo-google gmp-place-autocomplete { display: block; width: 100%; }
+  #o-via-conferma { display: block; margin-top: .35rem; }
+  #o-via-conferma.ok { color: #237a47; font-weight: 650; }
   .pre { border: 1.5px dashed var(--glass-edge); border-radius: 14px; padding: .2rem .9rem; background: var(--field-bg); }
   .pre[open] { padding-bottom: .9rem; }
   .pre summary { cursor: pointer; display: flex; justify-content: space-between; gap: .8rem; align-items: center; padding: .7rem 0; list-style: none; }
@@ -1024,7 +1029,7 @@
         <div class="field"><label for="o-nome">Nome</label><input id="o-nome" autocomplete="name"><span class="err" id="err-o-nome"></span></div>
         <div class="field"><label for="o-tel">Telefono</label><input id="o-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="333 123 4567"><span class="err" id="err-o-tel"></span></div>
 
-        <div class="field full solo-consegna"><label for="o-via">Indirizzo (via e numero civico)</label><input id="o-via" autocomplete="street-address" placeholder="Via dei Pini 24"><span class="err" id="err-o-via"></span></div>
+        <div class="field full solo-consegna"><label for="o-via-autocomplete">Indirizzo (via e numero civico)</label><div id="o-via-autocomplete" class="indirizzo-google"></div><input type="hidden" id="o-via"><span class="hint" id="o-via-conferma">Inizia a digitare e seleziona un indirizzo completo dall’elenco. Consegniamo solo a Ciampino.</span><span class="err" id="err-o-via"></span></div>
         <div class="field solo-consegna"><label for="o-cit">Citofono, scala, piano <span class="opt">(facoltativo)</span></label><input id="o-cit" placeholder="Rossi, scala B, 2° piano"></div>
         <div class="field solo-consegna"><label for="o-comune">Comune</label><select id="o-comune"></select><span class="hint" id="o-zona"></span></div>
 
@@ -1834,6 +1839,85 @@ ${pecorino}${chili}${pepe}
     anticipoConsegna: 45,        // minuti minimi da adesso per una consegna oggi
     anticipoAsporto: 30
   };
+  // Incolla qui la chiave Google Maps Platform, limitata a HTTP referrer del sito e alle API necessarie.
+  const GOOGLE_MAPS_API_KEY = "XXX";
+  let autocompleteIndirizzo = null, caricamentoGoogle = null, indirizzoSelezionato = null;
+  function caricaGooglePlaces() {
+    if (window.google && window.google.maps && window.google.maps.importLibrary) return Promise.resolve();
+    if (caricamentoGoogle) return caricamentoGoogle;
+    caricamentoGoogle = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(GOOGLE_MAPS_API_KEY) + "&v=weekly";
+      script.async = true; script.defer = true;
+      script.onload = resolve; script.onerror = () => reject(new Error("Google Places non si è caricato."));
+      document.head.appendChild(script);
+    });
+    return caricamentoGoogle;
+  }
+  function resetIndirizzoSelezionato(messaggio) {
+    indirizzoSelezionato = null; $("#o-via").value = "";
+    const info = $("#o-via-conferma");
+    info.classList.remove("ok");
+    info.textContent = messaggio || "Seleziona un indirizzo completo dall’elenco dei suggerimenti.";
+  }
+  async function inizializzaAutocompleteIndirizzo() {
+    if (autocompleteIndirizzo) return true;
+    if (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY.indexOf("INSERISCI_") === 0) {
+      errO("o-via", "Il selettore degli indirizzi non è ancora configurato.");
+      $("#o-via-conferma").textContent = "Configurazione Google Places mancante: il gestore deve inserire la chiave API nel codice del sito.";
+      return false;
+    }
+    try {
+      await caricaGooglePlaces();
+      const places = await google.maps.importLibrary("places");
+      autocompleteIndirizzo = new places.PlaceAutocompleteElement({ includedRegionCodes: ["it"] });
+      autocompleteIndirizzo.placeholder = "Es. Via Roma 10, Ciampino";
+      autocompleteIndirizzo.includedRegionCodes = ["it"];
+      autocompleteIndirizzo.locationBias = { radius: 5500, center: { lat: 41.8008, lng: 12.6022 } };
+      $("#o-via-autocomplete").replaceChildren(autocompleteIndirizzo);
+      autocompleteIndirizzo.addEventListener("input", () => resetIndirizzoSelezionato("Scegli una delle proposte: il testo digitato da solo non basta."));
+      autocompleteIndirizzo.addEventListener("keydown", e => {
+        if (e.key === "Backspace" || e.key === "Delete" || e.key.length === 1) resetIndirizzoSelezionato("Seleziona nuovamente un indirizzo dall’elenco.");
+      });
+      autocompleteIndirizzo.addEventListener("gmp-select", async ({ placePrediction }) => {
+        resetIndirizzoSelezionato("Verifico l’indirizzo selezionato…");
+        try {
+          const place = placePrediction.toPlace();
+          await place.fetchFields({ fields: ["id", "formattedAddress", "location", "addressComponents"] });
+          const components = place.addressComponents || [];
+          const comp = types => components.find(c => (c.types || []).some(t => types.indexOf(t) >= 0));
+          const via = comp(["route"]), civico = comp(["street_number"]);
+          const formatted = String(place.formattedAddress || "");
+          const comuneCiampino = components.find(c => /ciampino/i.test((c.longText || "") + " " + (c.shortText || "")));
+          const comune = comuneCiampino || comp(["locality", "postal_town", "administrative_area_level_3"]);
+          const localita = comuneCiampino ? (comuneCiampino.longText || comuneCiampino.shortText || "Ciampino") :
+            (/ciampino/i.test(formatted) ? "Ciampino" : (comune ? (comune.longText || comune.shortText || "") : ""));
+          const loc = place.location;
+          const lat = loc ? (typeof loc.lat === "function" ? loc.lat() : Number(loc.lat)) : NaN;
+          const lng = loc ? (typeof loc.lng === "function" ? loc.lng() : Number(loc.lng)) : NaN;
+          if (!place.id || !formatted || !via || !civico || !/ciampino/i.test(localita) || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+            resetIndirizzoSelezionato("Indirizzo incompleto o fuori zona. Scegli una proposta con via, numero civico e Comune di Ciampino.");
+            errO("o-via", "Seleziona un indirizzo completo a Ciampino.");
+            return;
+          }
+          indirizzoSelezionato = { indirizzo: formatted, placeId: place.id, latitudine: lat, longitudine: lng, localita: localita, numeroCivico: civico.longText || civico.shortText || "" };
+          $("#o-via").value = formatted;
+          const info = $("#o-via-conferma"); info.classList.add("ok");
+          info.textContent = "✓ Indirizzo selezionato: " + formatted;
+          errO("o-via", "");
+        } catch (err) {
+          resetIndirizzoSelezionato("Non riesco a verificare questa proposta. Scegli di nuovo l’indirizzo dall’elenco.");
+          errO("o-via", "Verifica dell’indirizzo non riuscita.");
+        }
+      });
+      resetIndirizzoSelezionato();
+      return true;
+    } catch (err) {
+      errO("o-via", "Suggerimenti indirizzo non disponibili. Riprova più tardi.");
+      $("#o-via-conferma").textContent = "Google Places non è riuscito a caricarsi.";
+      return false;
+    }
+  }
   // 0 = domenica … 6 = sabato. Asporto solo dal lunedì al venerdì.
   const ORARI_ASPORTO = { 1: [["18:30", "22:30"]], 2: [["18:30", "22:30"]], 3: [["18:30", "22:30"]], 4: [["18:30", "22:30"]], 5: [["18:30", "22:30"]] };
   const ORARI_CONSEGNA = {
@@ -1894,6 +1978,8 @@ ${pecorino}${chili}${pepe}
     oResult.classList.remove("show");
     if (m === "tavolo") return;
     const cons = m === "consegna";
+    if (cons) inizializzaAutocompleteIndirizzo();
+    else if (indirizzoSelezionato) { resetIndirizzoSelezionato("Per una nuova consegna seleziona di nuovo l’indirizzo."); if (autocompleteIndirizzo) autocompleteIndirizzo.value = ""; }
     $("#ord-titolo").textContent = cons ? "Consegna a domicilio" : "Asporto";
     $("#ord-sotto").textContent = cons ? "Scegli le pizze, te le portiamo a casa calde." : "Ordini adesso, passi a ritirare all’ora che scegli.";
     $("#o-ora-tipo").textContent = cons ? "(consegna)" : "(ritiro)";
@@ -1985,7 +2071,7 @@ ${pecorino}${chili}${pepe}
     else if (cons && c.sub < ORDINI.minimoConsegna) e.push(["o-righe", "Per la consegna il minimo è " + euro(ORDINI.minimoConsegna) + ".", $("#menu-ord")]);
     if (!$("#o-nome").value.trim()) e.push(["o-nome", "Scrivi il tuo nome.", $("#o-nome")]);
     if (!/^[0-9+\s]{8,16}$/.test($("#o-tel").value.trim())) e.push(["o-tel", "Controlla il numero: solo cifre, spazi e +.", $("#o-tel")]);
-    if (cons && $("#o-via").value.trim().length < 5) e.push(["o-via", "Scrivi via e numero civico.", $("#o-via")]);
+    if (cons && (!indirizzoSelezionato || $("#o-via").value.trim().length < 5)) e.push(["o-via", "Scegli un indirizzo completo dalla lista dei suggerimenti.", $("#o-via-autocomplete")]);
     return { e, c, ora };
   }
   function mostraO(titolo, testo) {
@@ -2010,6 +2096,9 @@ ${pecorino}${chili}${pepe}
       tipo: "ordine", modalita: ord.modo, data: oData.value, ora: ora,
       nome: $("#o-nome").value.trim(), telefono: $("#o-tel").value.trim(),
       indirizzo: cons ? $("#o-via").value.trim() : "", citofono: cons ? $("#o-cit").value.trim() : "", comune: cons ? $("#o-comune").value : "",
+      indirizzo_verificato: cons && !!indirizzoSelezionato, place_id: cons && indirizzoSelezionato ? indirizzoSelezionato.placeId : "",
+      latitudine: cons && indirizzoSelezionato ? indirizzoSelezionato.latitudine : "", longitudine: cons && indirizzoSelezionato ? indirizzoSelezionato.longitudine : "",
+      localita: cons && indirizzoSelezionato ? indirizzoSelezionato.localita : "", numero_civico: cons && indirizzoSelezionato ? indirizzoSelezionato.numeroCivico : "",
       righe: c.righe.map(r => ({ id: r.id, qta: r.qta })), totale_visto: c.tot,
       pagamento: (formOrd.querySelector('input[name="pag"]:checked') || {}).value || "contanti",
       note: $("#o-note").value.trim(), sito_web: $("#o-sito_web").value
@@ -2026,6 +2115,7 @@ ${pecorino}${chili}${pepe}
       ord.qta = {}; formOrd.reset(); compilaCliente();
       document.querySelectorAll(".riga-ord").forEach(rg => { rg.classList.remove("scelta"); rg.querySelector("output").textContent = 0; rg.querySelector('[data-d="-1"]').disabled = true; });
       $("#o-comune").value = ORDINI.comuni[0];
+      resetIndirizzoSelezionato(); if (autocompleteIndirizzo) autocompleteIndirizzo.value = "";
       oData.dispatchEvent(new Event("change")); aggiornaCarrello();
     } catch (err) {
       console.warn("Ordine non inviato:", err && err.message);
@@ -2092,7 +2182,8 @@ ${pecorino}${chili}${pepe}
   }
   function compilaCliente() {
     const c = leggiCliente();
-    [["#nome", c.nome], ["#telefono", c.tel], ["#o-nome", c.nome], ["#o-tel", c.tel], ["#o-via", c.via], ["#o-cit", c.cit]].forEach(([s, v]) => { const el = $(s); if (el && v && !el.value) el.value = v; });
+    [["#nome", c.nome], ["#telefono", c.tel], ["#o-nome", c.nome], ["#o-tel", c.tel], ["#o-cit", c.cit]].forEach(([s, v]) => { const el = $(s); if (el && v && !el.value) el.value = v; });
+    // L’indirizzo precedente non viene precompilato: va riselezionato dal suggeritore, così le coordinate sono certe.
     aggiorna();
   }
   compilaCliente();
