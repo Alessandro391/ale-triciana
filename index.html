@@ -725,9 +725,20 @@
   .pag:has(input:checked) { border-color: var(--pomodoro); }
   .pag.off { opacity: .55; cursor: not-allowed; }
   #ordine .btn-main { justify-self: start; }
-  .indirizzo-google { width: 100%; min-height: 52px; border-radius: 12px; }
-  .indirizzo-google gmp-place-autocomplete { display: block; width: 100%; min-height: 52px; }
-  .indirizzo-google gmp-place-autocomplete { display: block; width: 100%; }
+  /* Indirizzo: via con suggerimenti (vie di OpenStreetMap) + numero civico */
+  .via-riga { display: grid; grid-template-columns: minmax(0, 1fr) 5.5rem; gap: .5rem; }
+  .via-cerca { position: relative; }
+  .via-cerca input { width: 100%; }
+  #o-via-lista { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + .35rem); margin: 0; padding: .35rem; list-style: none; max-height: 300px; overflow: auto;
+    background: rgba(255, 253, 248, .98); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid var(--glass-border, #eee); border-radius: 16px; box-shadow: 0 18px 40px -12px rgba(0,0,0,.25); }
+  #o-via-lista li { display: flex; justify-content: space-between; align-items: center; gap: .8rem; padding: .65rem .75rem; border-radius: 11px; cursor: pointer; font-weight: 600; }
+  #o-via-lista li small { color: var(--text-soft); font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  #o-via-lista li:hover, #o-via-lista li.attiva { background: var(--hover-tint, rgba(242,181,58,.2)); }
+  #o-via-lista li.fuori { opacity: .5; cursor: not-allowed; }
+  #o-via-lista li.via-vuota { color: var(--text-soft); font-weight: 500; cursor: default; }
+  #o-civico { text-align: center; font-variant-numeric: tabular-nums; }
+  @media (prefers-color-scheme: dark) { #o-via-lista { background: rgba(46, 39, 36, .98); } }
   #o-via-conferma { display: block; margin-top: .35rem; }
   #o-via-conferma.ok { color: #237a47; font-weight: 650; }
   .pre { border: 1.5px dashed var(--glass-edge); border-radius: 14px; padding: .2rem .9rem; background: var(--field-bg); }
@@ -748,6 +759,33 @@
     .riga-ord .pr { grid-column: 1; grid-row: 2; margin-top: -.3rem; font-size: .88rem; }
     .riga-ord .qta { grid-row: 1 / span 2; grid-column: 2; }
   }
+
+  /* =====================================================================
+     SEMPLICE E LEGGIBILE: testo più grande, tasti più grandi, meno distrazioni
+     (solo aspetto: nessuna logica cambiata)
+     ===================================================================== */
+  body { font-size: 1.125rem; }
+  .hero-hint, .pag.off { display: none !important; }
+  .nascosto { display: none !important; }
+  label, .label { font-size: 1.02rem; font-weight: 700; }
+  input, select, textarea, .ms-btn { font-size: 1.05rem; min-height: 3rem; }
+  .chip { min-height: 2.9rem; padding: .7rem 1.05rem; font-size: 1rem; }
+  .slot span, .ora-sel span { min-height: 2.8rem; padding: .65rem .95rem; font-size: 1.02rem; display: inline-flex; align-items: center; }
+  .stepper button { width: 3.1rem; height: 3.1rem; font-size: 1.5rem; }
+  .qta button { width: 2.8rem; height: 2.8rem; font-size: 1.35rem; }
+  .qta output { min-width: 2rem; font-size: 1.05rem; }
+  .btn-main { font-size: 1.12rem; padding: 1.1rem 1.8rem; }
+  #invia, #o-invia { width: 100%; justify-self: stretch; text-align: center; }
+  .az b { font-size: 1.2rem; }
+  .az small { font-size: .9rem; }
+  .riga-ord .np { font-size: 1.05rem; }
+  .unita { font-weight: 500; font-size: .82em; color: var(--text-soft); }
+  .minimo-barra { height: 8px; border-radius: 99px; background: var(--glass-edge, #E4D9C4); overflow: hidden; margin-top: .45rem; }
+  .minimo-barra span { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--tuorlo); transition: width .4s; }
+  .minimo-barra.ok span { background: var(--ok); }
+  .torta-tot { display: block; font-weight: 700; color: var(--warn); }
+  /* Il pulsante finale resta sempre a portata di dito mentre si compila, con il totale scritto sopra */
+  #invia, #o-invia { position: sticky; bottom: calc(.7rem + env(safe-area-inset-bottom, 0px)); z-index: 6; box-shadow: 0 12px 28px -10px rgba(179,38,30,.7); }
 </style>
 </head>
 <body>
@@ -768,11 +806,11 @@
     <div class="hero-grid">
       <div>
         <h1>Le quattro romane, su una pizza.</h1>
-        <p class="lead">Pizzeria a Ciampino. Carbonara, amatriciana, gricia e cacio e pepe, cotte in pala come si deve.</p>
+        <p class="lead">Pizzeria romana a Ciampino.</p>
         <div class="hero-actions azioni-top">
-          <a class="az" href="#prenota" data-vai="tavolo"><span class="ico" aria-hidden="true">🍽️</span><span><b>Prenota un tavolo</b><small>Scegli l’ora, ci pensiamo noi</small></span></a>
-          <a class="az" href="#prenota" data-vai="consegna"><span class="ico" aria-hidden="true">🛵</span><span><b>Consegna a domicilio</b><small>A Ciampino, calde a casa tua</small></span></a>
-          <a class="az" href="#prenota" data-vai="asporto"><span class="ico" aria-hidden="true">🥡</span><span><b>Asporto</b><small>Dal lunedì al venerdì</small></span></a>
+          <a class="az" href="#prenota" data-vai="tavolo"><span class="ico" aria-hidden="true">🍽️</span><span><b>Prenota un tavolo</b><small>Scegli giorno e ora</small></span></a>
+          <a class="az" href="#prenota" data-vai="consegna"><span class="ico" aria-hidden="true">🛵</span><span><b>Consegna a casa</b><small>Consegna 2,50 € · minimo 15 €</small></span></a>
+          <a class="az" href="#prenota" data-vai="asporto"><span class="ico" aria-hidden="true">🥡</span><span><b>Asporto</b><small id="az-asporto">Dal lunedì al venerdì</small></span></a>
         </div>
         <p class="hero-hint" id="hero-hint">Passa sopra una pizza per vedere cosa c’è sopra. Cliccala per trovarla nel menu.</p>
       </div>
@@ -807,7 +845,7 @@
   <section id="menu">
     <div class="wrap">
       <h2 class="reveal">Il menu</h2>
-      <p class="intro reveal">Le quattro romane sono il motivo per cui esistiamo. Il resto è quello che ti aspetti da una pizzeria di quartiere, fatto con cura.</p>
+      <p class="intro reveal">Le quattro romane sono la nostra specialità.</p>
 
       <div class="menu-grid">
         <div>
@@ -815,19 +853,19 @@
             <h3>Le quattro romane</h3>
             <div class="item" id="m-carbonara" data-pizza="carbonara">
               <div class="item-row"><span>Carbonara</span><span class="dots"></span><span class="price">11,00 €</span></div>
-              <p>Fior di latte, guanciale croccante, crema di tuorlo aggiunta a fine cottura, pecorino romano DOP e pepe nero.</p>
+              <p>Guanciale, tuorlo, pecorino, pepe.</p>
             </div>
             <div class="item" id="m-amatriciana" data-pizza="amatriciana">
               <div class="item-row"><span>Amatriciana</span><span class="dots"></span><span class="price">10,50 €</span></div>
-              <p>Pomodoro San Marzano, guanciale, pecorino romano e un filo di peperoncino.</p>
+              <p>Pomodoro, guanciale, pecorino, peperoncino.</p>
             </div>
             <div class="item" id="m-gricia" data-pizza="gricia">
               <div class="item-row"><span>Gricia</span><span class="dots"></span><span class="price">10,00 €</span></div>
-              <p>Fior di latte, guanciale e pecorino romano, con pepe nero macinato al momento.</p>
+              <p>Guanciale, pecorino, pepe.</p>
             </div>
             <div class="item" id="m-cacio" data-pizza="cacio">
               <div class="item-row"><span>Cacio e pepe</span><span class="dots"></span><span class="price">9,00 €</span></div>
-              <p>Crema di pecorino romano e pepe nero tostato. Due ingredienti, nessun posto dove nascondersi.</p>
+              <p>Crema di pecorino, pepe nero.</p>
             </div>
           </div>
 
@@ -845,8 +883,8 @@
             <h3>Fritti</h3>
             <div class="item"><div class="item-row"><span>Supplì al telefono</span><span class="dots"></span><span class="price">2,50 €</span></div></div>
             <div class="item"><div class="item-row"><span>Fiore di zucca fritto</span><span class="dots"></span><span class="price">3,00 €</span></div></div>
-            <div class="item"><div class="item-row"><span>Olive ascolane (6)</span><span class="dots"></span><span class="price">4,50 €</span></div></div>
-            <div class="item"><div class="item-row"><span>Crocchette di patate (4)</span><span class="dots"></span><span class="price">4,00 €</span></div></div>
+            <div class="item"><div class="item-row"><span>Olive ascolane (6) <small class="unita">0,75 € l’una</small></span><span class="dots"></span><span class="price">4,50 €</span></div></div>
+            <div class="item"><div class="item-row"><span>Crocchette di patate (4) <small class="unita">1,00 € l’una</small></span><span class="dots"></span><span class="price">4,00 €</span></div></div>
           </div>
 
           <div class="menu-block reveal">
@@ -880,7 +918,7 @@
         <p>Via dell’Esempio 12, 00043 Ciampino (RM)</p>
         <p>A cinque minuti a piedi dalla stazione. Parcheggio in strada.</p>
         <p>Telefono: <a href="tel:+390600000000">06 0000 0000</a></p>
-        <a class="btn btn-main" href="https://www.google.com/maps/search/?api=1&query=Ciampino" target="_blank" rel="noopener">Apri in Google Maps</a>
+        <a class="btn btn-main" href="https://www.google.com/maps/search/?api=1&query=41.808,12.597611" target="_blank" rel="noopener">Apri in Google Maps</a>
       </div>
     </div>
   </section>
@@ -896,12 +934,7 @@
     <div class="wrap booking-grid" id="box-tavolo">
       <div class="how reveal">
         <h2>Prenota un tavolo</h2>
-        <p>Niente attesa al telefono. Ci vuole un minuto.</p>
-        <ol>
-          <li>Scegli giorno, ora e quante persone siete.</li>
-          <li>Aggiungi le richieste speciali, se ne hai.</li>
-          <li>Invia la richiesta dal sito: il sistema verifica la disponibilità e ti mostra l’esito della prenotazione.</li>
-        </ol>
+        <p>Un minuto, senza telefonare.</p>
 
         <aside class="summary" aria-label="Riepilogo della prenotazione">
           <div class="sum-head"><span>La tua richiesta</span><span id="sum-pct">0%</span></div>
@@ -979,7 +1012,7 @@
 
         <div class="field full">
           <label for="note">Note (facoltative)</label>
-          <textarea id="note" name="note" placeholder="Qualsiasi altra cosa che dobbiamo sapere…"></textarea>
+          <textarea id="note" name="note" placeholder="Facoltativo"></textarea>
         </div>
         <p class="field full hint">Usiamo nome e telefono solo per gestire questa prenotazione. <a href="#privacy-info">Informativa privacy</a></p>
         <input type="text" id="sito_web" name="sito_web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
@@ -1029,7 +1062,12 @@
         <div class="field"><label for="o-nome">Nome</label><input id="o-nome" autocomplete="name"><span class="err" id="err-o-nome"></span></div>
         <div class="field"><label for="o-tel">Telefono</label><input id="o-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="333 123 4567"><span class="err" id="err-o-tel"></span></div>
 
-        <div class="field full solo-consegna"><label for="o-via-autocomplete">Indirizzo (via e numero civico)</label><div id="o-via-autocomplete" class="indirizzo-google"></div><input type="hidden" id="o-via"><span class="hint" id="o-via-conferma">Inizia a digitare e seleziona un indirizzo completo dall’elenco. Consegniamo solo a Ciampino.</span><span class="err" id="err-o-via"></span></div>
+        <div class="field full solo-consegna"><label for="o-via-cerca">Indirizzo (via e numero civico)</label>
+          <div class="via-riga" id="o-via-autocomplete">
+            <div class="via-cerca"><input id="o-via-cerca" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="o-via-lista" autocomplete="off" spellcheck="false" placeholder="Via, viale, piazza…"><ul id="o-via-lista" role="listbox" hidden></ul></div>
+            <input id="o-civico" type="text" inputmode="text" autocomplete="off" placeholder="N°" aria-label="Numero civico">
+          </div>
+          <input type="hidden" id="o-via"><span class="hint" id="o-via-conferma">Scrivi la via, sceglila dall’elenco e aggiungi il numero civico.</span><span class="err" id="err-o-via"></span></div>
         <div class="field solo-consegna"><label for="o-cit">Citofono, scala, piano <span class="opt">(facoltativo)</span></label><input id="o-cit" placeholder="Rossi, scala B, 2° piano"></div>
         <div class="field solo-consegna"><label for="o-comune">Comune</label><select id="o-comune"></select><span class="hint" id="o-zona"></span></div>
 
@@ -1042,7 +1080,7 @@
           </div>
         </div>
 
-        <div class="field full"><label for="o-note">Note <span class="opt">(facoltative)</span></label><textarea id="o-note" placeholder="Allergie, senza cipolla, suona due volte…"></textarea></div>
+        <div class="field full"><label for="o-note">Note <span class="opt">(facoltative)</span></label><textarea id="o-note" placeholder="Facoltativo"></textarea></div>
         <div class="field full">
           <p class="hint">Usiamo i tuoi dati (nome, telefono e, per la consegna, indirizzo) solo per gestire questo ordine. <a href="#privacy-info">Informativa privacy</a></p>
         </div>
@@ -1166,7 +1204,10 @@
     nomeLocale: "Ale Triciana",
     webhook: "https://script.google.com/macros/s/AKfycbyQWFn54Mxha48YbltAELYsGlcX4FG8OH8xYKS1Q3JLhFhE0O5s1EIT5nFCay4zePz4JQ/exec",
     maxPersone: 8,
-    telefonoLocale: "06 0000 0000"
+    telefonoLocale: "06 0000 0000",
+    // Questi valori sono quelli di partenza: all'apertura il sito legge quelli veri dal foglio "Parametri"
+    // dello sheet (applicaConfig, in fondo alla pagina). Così il ristoratore li cambia dal gestionale.
+    prenotazioniAttive: true, intervallo: 30, ultima: 60, anticipo: 30
   };
 
   // Orari: 0 = domenica … 6 = sabato. Ultimo tavolo un'ora prima della chiusura.
@@ -1332,6 +1373,7 @@ ${pecorino}${chili}${pepe}
     }
     el.addEventListener("click", () => {
       const t = document.getElementById("m-" + tipo);
+      if (!t) return location.hash = "#menu";
       t.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
       t.classList.remove("flash"); void t.offsetWidth; t.classList.add("flash");
     });
@@ -1362,10 +1404,14 @@ ${pecorino}${chili}${pepe}
 
   // Anteprima della pizza che segue il cursore sulle quattro romane del menu
   const floatEl = $("#float-pizza");
-  if (finePointer) {
-    const cache = {};
-    let raf = 0, fx = 0, fy = 0;
-    document.querySelectorAll(".romane .item").forEach(item => {
+  const cachePizze = {};
+  let rafP = 0, fx = 0, fy = 0;
+  // richiamata anche quando il menù viene ricostruito dal foglio Menù
+  function attivaPizze() {
+    if (!finePointer) return;
+    const cache = cachePizze;
+    document.querySelectorAll(".romane .item[data-pizza]").forEach(item => {
+      if (item.dataset.pronta) return; item.dataset.pronta = "1";
       item.addEventListener("mouseenter", () => {
         const t = item.dataset.pizza;
         cache[t] = cache[t] || pizzaSVG(t);
@@ -1375,15 +1421,16 @@ ${pecorino}${chili}${pepe}
       item.addEventListener("mousemove", e => {
         fx = e.clientX + 24; fy = e.clientY - 75;
         if (fx + 160 > innerWidth) fx = e.clientX - 174;
-        if (!raf) raf = requestAnimationFrame(() => {
+        if (!rafP) rafP = requestAnimationFrame(() => {
           floatEl.style.setProperty("--fx", fx + "px");
           floatEl.style.setProperty("--fy", fy + "px");
-          raf = 0;
+          rafP = 0;
         });
       });
       item.addEventListener("mouseleave", () => floatEl.classList.remove("show"));
     });
   }
+  attivaPizze();
 
   // Comparsa delle sezioni allo scroll
   if ("IntersectionObserver" in window) {
@@ -1413,23 +1460,48 @@ ${pecorino}${chili}${pepe}
   const GIORNI = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
   const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 
-  (function statoLocale() {
+  function statoLocale() {
     const n = new Date(), g = n.getDay(), m = n.getHours() * 60 + n.getMinutes();
     document.querySelectorAll(".hours tr").forEach(tr => {
       if (tr.dataset.days.split(",").map(Number).includes(g)) tr.classList.add("today");
     });
     const badge = $("#badge"), txt = badge.querySelector("span");
-    const aperto = ORARI[g].find(([a, b]) => m >= toMin(a) && m < toMin(b));
-    if (aperto) { badge.classList.add("open"); txt.textContent = "Aperto adesso, fino alle " + aperto[1]; return; }
+    const aperto = (ORARI[g] || []).find(([a, b]) => m >= toMin(a) && m < toMin(b));
+    badge.classList.toggle("open", !!aperto);
+    if (aperto) { txt.textContent = "Aperto adesso, fino alle " + aperto[1]; return; }
     for (let i = 0; i < 8; i++) {
       const gg = (g + i) % 7;
-      for (const [a] of ORARI[gg]) {
+      for (const [a] of (ORARI[gg] || [])) {
         if (i === 0 && toMin(a) <= m) continue;
         txt.textContent = "Chiuso adesso, riapriamo " + (i === 0 ? "oggi" : i === 1 ? "domani" : GIORNI[gg]) + " alle " + a;
         return;
       }
     }
-  })();
+  }
+  statoLocale();
+  // Tabella degli orari costruita dai parametri: giorni consecutivi con gli stessi orari stanno su una riga
+  const NOMI_G = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"], ORDINE_G = [1, 2, 3, 4, 5, 6, 0];
+  const testoFasce = f => f.length ? f.map(([a, b]) => a + " – " + b).join(" · ") : "Chiuso";
+  function gruppiGiorni(orari) {
+    const out = [];
+    ORDINE_G.forEach(g => {
+      const t = testoFasce(orari[g] || []), u = out[out.length - 1];
+      if (u && u.t === t) u.giorni.push(g); else out.push({ t: t, giorni: [g] });
+    });
+    return out;
+  }
+  const nomeGruppo = gg => gg.length === 1 ? NOMI_G[gg[0]] : gg.length === 2 ? NOMI_G[gg[0]] + " e " + NOMI_G[gg[1]].toLowerCase() : NOMI_G[gg[0]] + " – " + NOMI_G[gg[gg.length - 1]];
+  function disegnaOrariSito() {
+    const tb = document.querySelector(".hours tbody"); if (!tb) return;
+    tb.innerHTML = gruppiGiorni(ORARI).map(x => '<tr' + (x.t === "Chiuso" ? ' class="closed"' : "") + ' data-days="' + x.giorni.join(",") + '"><td>' + nomeGruppo(x.giorni) + "</td><td>" + x.t + "</td></tr>").join("");
+    statoLocale();
+  }
+  // "Il lunedì siamo chiusi." / "Il lunedì e il martedì siamo chiusi." / "" se apriamo tutti i giorni
+  function testoChiusura() {
+    const chiusi = ORDINE_G.filter(g => !(ORARI[g] || []).length).map(g => GIORNI[g]);
+    if (!chiusi.length) return "";
+    return (chiusi.length === 1 ? "Il " + chiusi[0] : chiusi.map(x => "il " + x).join(", ").replace(/^il/, "Il").replace(/, (il [^,]+)$/, " e $1")) + " siamo chiusi.";
+  }
 
   /* =========================================================
      PRENOTAZIONE
@@ -1445,17 +1517,19 @@ ${pecorino}${chili}${pepe}
   function slotsFor(dateStr) {
     const g = new Date(dateStr + "T12:00:00").getDay();
     const isToday = dateStr === iso(new Date());
-    const now = new Date(), limite = now.getHours() * 60 + now.getMinutes() + 30;
-    return ORARI[g].map(([a, b]) => {
+    const now = new Date(), limite = now.getHours() * 60 + now.getMinutes() + CONFIG.anticipo;
+    if (!CONFIG.prenotazioniAttive) return [];
+    return (ORARI[g] || []).map(([a, b]) => {
       const times = [];
-      for (let t = toMin(a); t <= toMin(b) - 60; t += 30) if (!isToday || t >= limite) times.push(toHHMM(t));
-      return { label: toMin(a) < 16 * 60 ? "Pranzo" : "Cena", times };
+      for (let t = toMin(a); t <= toMin(b) - CONFIG.ultima; t += CONFIG.intervallo) if (!isToday || t >= limite) times.push(toHHMM(t));
+      return { label: toMin(a) < 17 * 60 ? "Pranzo" : "Cena", times };
     }).filter(x => x.times.length);
   }
 
   // Date veloci: i prossimi giorni di apertura
-  (function quickDates() {
+  function quickDates() {
     const box = $("#quick-dates");
+    box.innerHTML = "";
     let n = 0;
     for (let i = 0; n < 5 && i < 12; i++) {
       const d = new Date(); d.setDate(d.getDate() + i);
@@ -1468,7 +1542,8 @@ ${pecorino}${chili}${pepe}
       box.appendChild(b); n++;
       if (n === 1 && !dataEl.value) setTimeout(() => b.click(), 0); // il primo giorno libero è già scelto
     }
-  })();
+  }
+  quickDates();
 
   dataEl.addEventListener("change", () => {
     document.querySelectorAll("#quick-dates .chip").forEach(c => c.classList.toggle("on", c.dataset.value === dataEl.value));
@@ -1479,11 +1554,15 @@ ${pecorino}${chili}${pepe}
       hintEl.textContent = "Questa data è già passata."; hintEl.classList.add("warn");
       slotsEl.innerHTML = ""; return aggiorna();
     }
-    if (g === 1) {
-      hintEl.textContent = "Il lunedì siamo chiusi: scegli un altro giorno."; hintEl.classList.add("warn");
+    if (!CONFIG.prenotazioniAttive) {
+      hintEl.textContent = "In questo periodo le prenotazioni online sono chiuse."; hintEl.classList.add("warn");
+      slotsEl.innerHTML = '<p class="slots-empty">Per prenotare chiamaci al ' + CONFIG.telefonoLocale + '.</p>'; return aggiorna();
+    }
+    if (!(ORARI[g] || []).length) {
+      hintEl.textContent = "Il " + GIORNI[g] + " siamo chiusi: scegli un altro giorno."; hintEl.classList.add("warn");
       slotsEl.innerHTML = '<p class="slots-empty">Giorno di chiusura.</p>'; return aggiorna();
     }
-    hintEl.textContent = "Il lunedì siamo chiusi."; hintEl.classList.remove("warn");
+    hintEl.textContent = testoChiusura(); hintEl.classList.remove("warn");
     const gruppi = slotsFor(dataEl.value);
     if (!gruppi.length) {
       slotsEl.innerHTML = '<p class="slots-empty">Per oggi non ci sono più orari prenotabili online. Chiamaci al ' + CONFIG.telefonoLocale + '.</p>';
@@ -1547,7 +1626,7 @@ ${pecorino}${chili}${pepe}
       inArrivo[chiave] = leggiGestionale({ action: "disp", giorni: chiave })
         .then(j => {
           if (!j.ok) throw new Error(j.motivo || "risposta non valida");
-          Object.keys(j.giorni).forEach(g => { DISP[g] = { t: Date.now(), piene: j.giorni[g] }; });
+          Object.keys(j.giorni).forEach(g => { DISP[g] = { t: Date.now(), piene: j.giorni[g], ordini: (j.ordini_pieni || {})[g] || null }; });
         })
         .finally(() => { delete inArrivo[chiave]; });
     }
@@ -1836,87 +1915,188 @@ ${pecorino}${chili}${pepe}
     costoConsegna: 2.5,          // € a ordine
     minimoConsegna: 15,          // € di subtotale per la consegna
     comuni: ["Ciampino"],        // dove consegniamo
+    raggioKm: 4,                 // zona di consegna: km dal locale (uguale a raggio_consegna_km nel gestionale)
     anticipoConsegna: 45,        // minuti minimi da adesso per una consegna oggi
-    anticipoAsporto: 30
+    anticipoAsporto: 30,
+    // Posizione della pizzeria: 41°48'28.8"N 12°35'51.4"E. Da qui si calcolano i km di ogni via.
+    locale: { lat: 41.808, lng: 12.597611 },
+    intervallo: 15, consegnaAttiva: true, asportoAttivo: true
   };
-  // Incolla qui la chiave Google Maps Platform, limitata a HTTP referrer del sito e alle API necessarie.
-  const GOOGLE_MAPS_API_KEY = "XXX";
-  let autocompleteIndirizzo = null, caricamentoGoogle = null, indirizzoSelezionato = null;
-  function caricaGooglePlaces() {
-    if (window.google && window.google.maps && window.google.maps.importLibrary) return Promise.resolve();
-    if (caricamentoGoogle) return caricamentoGoogle;
-    caricamentoGoogle = new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(GOOGLE_MAPS_API_KEY) + "&v=weekly";
-      script.async = true; script.defer = true;
-      script.onload = resolve; script.onerror = () => reject(new Error("Google Places non si è caricato."));
-      document.head.appendChild(script);
-    });
-    return caricamentoGoogle;
+  /* ---------- Indirizzo di consegna senza Google ----------
+     I suggerimenti arrivano da strade-ciampino.json (vie di OpenStreetMap, pubblicato accanto a questa pagina).
+     Il cliente sceglie la via dall'elenco e scrive il numero civico: il punto sulla mappa del ristoratore
+     è quello della via. Niente chiave, niente costi, funziona anche se Google non risponde. */
+  const STRADE_URL = "strade-ciampino.json";
+  const CHIAVE_VIA = "aleTriciana.via";
+  let STRADE = null, caricamentoStrade = null, viaScelta = null, indirizzoSelezionato = null, autocompleteIndirizzo = null, attivoVia = -1;
+  function normVia(t) {
+    let s = String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[’'`]/g, " ");
+    const abbr = { "v.le": "viale", "v.": "via", "p.zza": "piazza", "p.za": "piazza", "p.le": "piazzale", "l.go": "largo", "c.so": "corso", "vic.": "vicolo" };
+    Object.keys(abbr).forEach(k => { s = s.split(k + " ").join(abbr[k] + " "); });
+    return s.replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
   }
+  function kmTra(a, b, c, d) { const r = Math.PI / 180, x = (d - b) * r * Math.cos((a + c) / 2 * r), y = (c - a) * r; return Math.sqrt(x * x + y * y) * 6371; }
+  const TIPI_VIA = /^(via|viale|piazza|piazzale|largo|vicolo|corso|strada|traversa|lungo|parco|salita|vialetto|piazzetta) /;
+  function caricaStrade() {
+    if (STRADE) return Promise.resolve(STRADE);
+    if (!caricamentoStrade) caricamentoStrade = fetch(STRADE_URL).then(r => { if (!r.ok) throw new Error("vie non trovate"); return r.json(); }).then(d => {
+      const viste = {}, L = ORDINI.locale;
+      // km ricalcolati dalla pizzeria (nel file sono misurati dal centro di Ciampino), poi
+      // una sola voce per nome: il tratto più vicino al locale
+      STRADE = d.strade.map(v => ({ via: v[0], n: normVia(v[0]), corto: normVia(v[0]).replace(TIPI_VIA, ""), lat: v[1], lng: v[2],
+          km: Math.round(kmTra(L.lat, L.lng, v[1], v[2]) * 100) / 100, id: v[4] }))
+        .sort((a, b) => a.km - b.km)
+        .filter(v => { if (viste[v.n]) return false; viste[v.n] = 1; return true; });
+      return STRADE;
+    }).catch(e => { caricamentoStrade = null; throw e; });
+    return caricamentoStrade;
+  }
+  function cercaVie(testo) {
+    const q = normVia(testo).replace(/\s\d+[a-z]?$/, ""), parole = q.split(" ").filter(Boolean);
+    if (!STRADE || !q || q.length < 2) return [];
+    const trovate = STRADE.filter(v => parole.every(p => v.n.indexOf(p) >= 0)).map(v => {
+      const inizio = v.corto.indexOf(q.replace(TIPI_VIA, "")) === 0 || v.n.indexOf(q) === 0 ? 0 : 1;
+      return { v: v, punti: inizio * 10 + (v.km <= ORDINI.raggioKm ? 0 : 20) + v.km };
+    }).sort((a, b) => a.punti - b.punti).map(x => x.v);
+    return trovate.slice(0, 8);
+  }
+  /* ---------- Dal civico al puntino (civici di OpenStreetMap, file civici-ciampino.json) ----------
+     1) il civico esiste → ESATTO (coordinate dell'edificio)
+     2) non esiste → cerco i civici dello stesso lato (pari o dispari): se ce n'è uno prima e uno dopo,
+        il punto sta tra i due in proporzione (es. 87 tra 85 e 89); altrimenti uso il civico più vicino → APPROSSIMATO
+     3) nessun civico di quella via → il punto della via, come prima.
+     Uso solo civici entro 1,5 km dal punto della via scelta: così "Via Roma" di un altro comune non si confonde. */
+  const CIVICI_URL = "civici-ciampino.json";
+  let CIVICI = null, caricamentoCivici = null;
+  function caricaCivici() {
+    if (CIVICI) return Promise.resolve(CIVICI);
+    if (!caricamentoCivici) caricamentoCivici = fetch(CIVICI_URL).then(r => { if (!r.ok) throw new Error("civici non trovati"); return r.json(); })
+      .then(d => (CIVICI = d.vie)).catch(e => { caricamentoCivici = null; throw e; });
+    return caricamentoCivici;
+  }
+  function puntoCivico(via, civico) {
+    const base = { tipo: "via", lat: via.lat, lng: via.lng, placeId: "via:" + via.id, rif: "" };
+    const tutti = (CIVICI && CIVICI[via.n]) || [];
+    const lista = tutti.filter(c => kmTra(c[2], c[3], via.lat, via.lng) <= 1.5);
+    const n = parseInt(civico, 10);
+    if (!lista.length || !Number.isFinite(n)) return base;
+    const esatto = lista.find(c => c[0] === civico.toUpperCase()) || lista.find(c => c[0] === String(n) && !/[a-z]/i.test(civico));
+    if (esatto) return { tipo: "esatto", lat: esatto[2], lng: esatto[3], placeId: "civico:" + esatto[4], rif: esatto[0] };
+    const lato = lista.filter(c => c[1] % 2 === n % 2), gruppo = lato.length ? lato : lista;
+    let prima = null, dopo = null;
+    gruppo.forEach(c => { if (c[1] < n && (!prima || c[1] > prima[1])) prima = c; if (c[1] > n && (!dopo || c[1] < dopo[1])) dopo = c; });
+    if (prima && dopo && dopo[1] - prima[1] <= 30) {
+      const t = (n - prima[1]) / (dopo[1] - prima[1]);
+      return { tipo: "vicino", lat: +(prima[2] + (dopo[2] - prima[2]) * t).toFixed(6), lng: +(prima[3] + (dopo[3] - prima[3]) * t).toFixed(6),
+        placeId: "vicino:" + prima[0] + "-" + dopo[0] + ":" + prima[4], rif: prima[0] + " e " + dopo[0] };
+    }
+    const vicino = gruppo.reduce((m, c) => !m || Math.abs(c[1] - n) < Math.abs(m[1] - n) ? c : m, null);
+    return { tipo: "vicino", lat: vicino[2], lng: vicino[3], placeId: "vicino:" + vicino[0] + ":" + vicino[4], rif: vicino[0] };
+  }
+
   function resetIndirizzoSelezionato(messaggio) {
     indirizzoSelezionato = null; $("#o-via").value = "";
-    const info = $("#o-via-conferma");
-    info.classList.remove("ok");
-    info.textContent = messaggio || "Seleziona un indirizzo completo dall’elenco dei suggerimenti.";
+    const info = $("#o-via-conferma"); info.classList.remove("ok");
+    info.textContent = messaggio || "Scrivi la via, sceglila dall’elenco e aggiungi il numero civico. Consegniamo entro " + ORDINI.raggioKm + " km dal locale.";
+  }
+  function aggiornaIndirizzo() {
+    const civico = $("#o-civico").value.trim().replace(/\s+/g, "");
+    if (!viaScelta) return resetIndirizzoSelezionato(STRADE ? "Scegli la via dall’elenco dei suggerimenti." : undefined);
+    if (!/^\d+[a-zA-Z]?(\/\w+)?$/.test(civico)) return resetIndirizzoSelezionato("Ora scrivi il numero civico di " + viaScelta.via + ".");
+    const comune = $("#o-comune").value || ORDINI.comuni[0];
+    const pt = puntoCivico(viaScelta, civico);
+    indirizzoSelezionato = { indirizzo: viaScelta.via + " " + civico + ", " + comune, placeId: pt.placeId, latitudine: pt.lat, longitudine: pt.lng, localita: comune, numeroCivico: civico, precisione: pt.tipo };
+    $("#o-via").value = indirizzoSelezionato.indirizzo;
+    const info = $("#o-via-conferma"); info.classList.add("ok");
+    info.textContent = "✓ " + viaScelta.via + " " + civico + " · " + String(viaScelta.km).replace(".", ",") + " km dal locale";
+    errO("o-via", "");
+    try { localStorage.setItem(CHIAVE_VIA, JSON.stringify({ v: viaScelta, c: civico })); } catch (e) {}
+  }
+  function mostraSuggerimenti(lista) {
+    const ul = $("#o-via-lista"), inp = $("#o-via-cerca"); attivoVia = -1;
+    if (!lista.length) {
+      ul.innerHTML = inp.value.trim().length >= 2 && STRADE ? '<li class="via-vuota">Nessuna via con questo nome nella nostra zona.</li>' : "";
+      ul.hidden = !ul.innerHTML; inp.setAttribute("aria-expanded", String(!ul.hidden)); return;
+    }
+    ul.innerHTML = lista.map((v, i) => {
+      const fuori = v.km > ORDINI.raggioKm;
+      return '<li role="option" id="via-op-' + i + '" data-i="' + i + '"' + (fuori ? ' aria-disabled="true" class="fuori"' : "") + '><span>' + v.via + '</span><small>' +
+        (fuori ? "fuori zona · " : "") + String(v.km).replace(".", ",") + " km</small></li>";
+    }).join("");
+    ul.hidden = false; inp.setAttribute("aria-expanded", "true");
+    ul._lista = lista;
+  }
+  // Via scritta a mano (senza toccare il suggerimento): se il testo è proprio una via dell'elenco la prendo.
+  // Accetto anche "Lavoro" per "Viale del Lavoro", ma solo se c'è UNA sola via possibile.
+  function viaDaTesto(testo) {
+    if (!STRADE) return null;
+    const q = normVia(testo).replace(/\s\d+[a-z]?(\/\w+)?$/, "").trim();
+    if (q.length < 3) return null;
+    const corto = q.replace(TIPI_VIA, "");
+    const esatte = STRADE.filter(v => v.n === q || v.corto === corto);
+    const vicine = esatte.filter(v => v.km <= ORDINI.raggioKm);
+    if (vicine.length) return vicine[0];
+    if (esatte.length) return null; // esiste ma è fuori zona
+    const parole = q.split(" ").filter(Boolean);
+    const possibili = STRADE.filter(v => v.km <= ORDINI.raggioKm && parole.every(w => v.n.indexOf(w) >= 0));
+    return possibili.length === 1 ? possibili[0] : null;
+  }
+  function provaViaScritta() {
+    if (viaScelta) return true;
+    const v = viaDaTesto($("#o-via-cerca").value);
+    if (!v) return false;
+    viaScelta = v; aggiornaIndirizzo(); return true;
+  }
+  function scegliVia(v) {
+    if (!v || v.km > ORDINI.raggioKm) return;
+    viaScelta = v; $("#o-via-cerca").value = v.via;
+    $("#o-via-lista").hidden = true; $("#o-via-cerca").setAttribute("aria-expanded", "false");
+    aggiornaIndirizzo();
+    if (!$("#o-civico").value.trim()) $("#o-civico").focus();
   }
   async function inizializzaAutocompleteIndirizzo() {
     if (autocompleteIndirizzo) return true;
-    if (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY.indexOf("INSERISCI_") === 0) {
-      errO("o-via", "Il selettore degli indirizzi non è ancora configurato.");
-      $("#o-via-conferma").textContent = "Configurazione Google Places mancante: il gestore deve inserire la chiave API nel codice del sito.";
-      return false;
+    const inp = $("#o-via-cerca"), ul = $("#o-via-lista");
+    autocompleteIndirizzo = inp;
+    caricaCivici().then(() => aggiornaIndirizzo()).catch(() => {}); // facoltativo: senza civici il punto è sulla via
+    try { await caricaStrade(); }
+    catch (e) {
+      autocompleteIndirizzo = null;
+      resetIndirizzoSelezionato("Elenco delle vie non disponibile: per ordinare chiamaci al " + CONFIG.telefonoLocale + ".");
+      errO("o-via", "Suggerimenti indirizzo non disponibili."); return false;
     }
+    inp.addEventListener("input", () => {
+      viaScelta = null;
+      const m = inp.value.match(/\s(\d+[a-zA-Z]?)\s*$/); // "Via Mario Calò 12": il numero va da solo nel civico
+      if (m) $("#o-civico").value = m[1];
+      // scritta per intero e uguale a una via dell'elenco: vale come se l'avesse scelta
+      const esatta = STRADE && STRADE.find(v => v.km <= ORDINI.raggioKm && v.n === normVia(inp.value).replace(/\s\d+[a-z]?$/, ""));
+      if (esatta) viaScelta = esatta;
+      aggiornaIndirizzo(); mostraSuggerimenti(cercaVie(inp.value));
+    });
+    inp.addEventListener("blur", () => setTimeout(provaViaScritta, 150)); // esce dal campo senza scegliere: provo io
+    inp.addEventListener("focus", () => { if (!viaScelta && inp.value.trim()) mostraSuggerimenti(cercaVie(inp.value)); });
+    inp.addEventListener("keydown", e => {
+      const voci = [...ul.querySelectorAll("li[data-i]")];
+      if (ul.hidden || !voci.length) return;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault(); attivoVia = (attivoVia + (e.key === "ArrowDown" ? 1 : -1) + voci.length) % voci.length;
+        voci.forEach((li, i) => li.classList.toggle("attiva", i === attivoVia)); inp.setAttribute("aria-activedescendant", "via-op-" + attivoVia);
+      } else if (e.key === "Enter") { e.preventDefault(); scegliVia(ul._lista[attivoVia < 0 ? 0 : attivoVia]); }
+      else if (e.key === "Escape") { ul.hidden = true; inp.setAttribute("aria-expanded", "false"); }
+    });
+    ul.addEventListener("pointerdown", e => { const li = e.target.closest("li[data-i]"); if (li) { e.preventDefault(); scegliVia(ul._lista[+li.dataset.i]); } });
+    document.addEventListener("click", e => { if (!e.target.closest(".via-cerca")) { ul.hidden = true; inp.setAttribute("aria-expanded", "false"); } });
+    $("#o-civico").addEventListener("input", aggiornaIndirizzo);
+    $("#o-comune").addEventListener("change", aggiornaIndirizzo);
+    // cliente che torna: ritrovo l'ultimo indirizzo (salvato solo sul suo telefono)
     try {
-      await caricaGooglePlaces();
-      const places = await google.maps.importLibrary("places");
-      autocompleteIndirizzo = new places.PlaceAutocompleteElement({ includedRegionCodes: ["it"] });
-      autocompleteIndirizzo.placeholder = "Es. Via Roma 10, Ciampino";
-      autocompleteIndirizzo.includedRegionCodes = ["it"];
-      autocompleteIndirizzo.locationBias = { radius: 5500, center: { lat: 41.8008, lng: 12.6022 } };
-      $("#o-via-autocomplete").replaceChildren(autocompleteIndirizzo);
-      autocompleteIndirizzo.addEventListener("input", () => resetIndirizzoSelezionato("Scegli una delle proposte: il testo digitato da solo non basta."));
-      autocompleteIndirizzo.addEventListener("keydown", e => {
-        if (e.key === "Backspace" || e.key === "Delete" || e.key.length === 1) resetIndirizzoSelezionato("Seleziona nuovamente un indirizzo dall’elenco.");
-      });
-      autocompleteIndirizzo.addEventListener("gmp-select", async ({ placePrediction }) => {
-        resetIndirizzoSelezionato("Verifico l’indirizzo selezionato…");
-        try {
-          const place = placePrediction.toPlace();
-          await place.fetchFields({ fields: ["id", "formattedAddress", "location", "addressComponents"] });
-          const components = place.addressComponents || [];
-          const comp = types => components.find(c => (c.types || []).some(t => types.indexOf(t) >= 0));
-          const via = comp(["route"]), civico = comp(["street_number"]);
-          const formatted = String(place.formattedAddress || "");
-          const comuneCiampino = components.find(c => /ciampino/i.test((c.longText || "") + " " + (c.shortText || "")));
-          const comune = comuneCiampino || comp(["locality", "postal_town", "administrative_area_level_3"]);
-          const localita = comuneCiampino ? (comuneCiampino.longText || comuneCiampino.shortText || "Ciampino") :
-            (/ciampino/i.test(formatted) ? "Ciampino" : (comune ? (comune.longText || comune.shortText || "") : ""));
-          const loc = place.location;
-          const lat = loc ? (typeof loc.lat === "function" ? loc.lat() : Number(loc.lat)) : NaN;
-          const lng = loc ? (typeof loc.lng === "function" ? loc.lng() : Number(loc.lng)) : NaN;
-          if (!place.id || !formatted || !via || !civico || !/ciampino/i.test(localita) || !Number.isFinite(lat) || !Number.isFinite(lng)) {
-            resetIndirizzoSelezionato("Indirizzo incompleto o fuori zona. Scegli una proposta con via, numero civico e Comune di Ciampino.");
-            errO("o-via", "Seleziona un indirizzo completo a Ciampino.");
-            return;
-          }
-          indirizzoSelezionato = { indirizzo: formatted, placeId: place.id, latitudine: lat, longitudine: lng, localita: localita, numeroCivico: civico.longText || civico.shortText || "" };
-          $("#o-via").value = formatted;
-          const info = $("#o-via-conferma"); info.classList.add("ok");
-          info.textContent = "✓ Indirizzo selezionato: " + formatted;
-          errO("o-via", "");
-        } catch (err) {
-          resetIndirizzoSelezionato("Non riesco a verificare questa proposta. Scegli di nuovo l’indirizzo dall’elenco.");
-          errO("o-via", "Verifica dell’indirizzo non riuscita.");
-        }
-      });
-      resetIndirizzoSelezionato();
-      return true;
-    } catch (err) {
-      errO("o-via", "Suggerimenti indirizzo non disponibili. Riprova più tardi.");
-      $("#o-via-conferma").textContent = "Google Places non è riuscito a caricarsi.";
-      return false;
-    }
+      const s = JSON.parse(localStorage.getItem(CHIAVE_VIA) || "null");
+      const v = s && STRADE.find(x => x.id === s.v.id && x.via === s.v.via);
+      if (v && !inp.value) { inp.value = v.via; $("#o-civico").value = s.c || ""; viaScelta = v; }
+    } catch (e) {}
+    aggiornaIndirizzo();
+    return true;
   }
   // 0 = domenica … 6 = sabato. Asporto solo dal lunedì al venerdì.
   const ORARI_ASPORTO = { 1: [["18:30", "22:30"]], 2: [["18:30", "22:30"]], 3: [["18:30", "22:30"]], 4: [["18:30", "22:30"]], 5: [["18:30", "22:30"]] };
@@ -1925,7 +2105,8 @@ ${pecorino}${chili}${pepe}
     2: [["19:00", "22:30"]], 3: [["19:00", "22:30"]], 4: [["19:00", "22:30"]], 5: [["19:00", "22:30"]],
     6: [["12:30", "14:30"], ["19:00", "22:30"]]
   };
-  // Stessi id del listino nel gestionale (Codice.gs → LISTINO)
+  // Il listino vero arriva dal foglio "Menù" (applicaConfig): questi sono i valori di partenza.
+  // sala: true = solo in sala (non compare in domicilio e asporto, ma si può pre-ordinare con il tavolo)
   const LISTINO = [
     { id: "carbonara", g: "Le quattro romane", nome: "Carbonara", prezzo: 11 },
     { id: "amatriciana", g: "Le quattro romane", nome: "Amatriciana", prezzo: 10.5 },
@@ -1937,8 +2118,8 @@ ${pecorino}${chili}${pepe}
     { id: "patate", g: "Le altre pizze", nome: "Patate e rosmarino", prezzo: 8 },
     { id: "suppli", g: "Fritti", nome: "Supplì al telefono", prezzo: 2.5 },
     { id: "fiore_fritto", g: "Fritti", nome: "Fiore di zucca fritto", prezzo: 3 },
-    { id: "olive", g: "Fritti", nome: "Olive ascolane (6)", prezzo: 4.5 },
-    { id: "crocchette", g: "Fritti", nome: "Crocchette di patate (4)", prezzo: 4 },
+    { id: "olive", g: "Fritti", nome: "Olive ascolane (6)", sub: "0,75 € l’una", prezzo: 4.5 },
+    { id: "crocchette", g: "Fritti", nome: "Crocchette di patate (4)", sub: "1,00 € l’una", prezzo: 4 },
     { id: "birra33", g: "Da bere", nome: "Birra artigianale 33 cl", sub: "Solo per maggiorenni", prezzo: 6 },
     { id: "acqua", g: "Da bere", nome: "Acqua 0,75 l", prezzo: 2 }
   ];
@@ -1956,7 +2137,7 @@ ${pecorino}${chili}${pepe}
     const oggi = dateStr === iso(new Date()), n = new Date();
     const limite = n.getHours() * 60 + n.getMinutes() + (ord.modo === "asporto" ? ORDINI.anticipoAsporto : ORDINI.anticipoConsegna);
     const out = [];
-    fasce.forEach(([a, b]) => { for (let t = toMin(a); t <= toMin(b); t += 15) if (!oggi || t >= limite) out.push(toHHMM(t)); });
+    fasce.forEach(([a, b]) => { for (let t = toMin(a); t <= toMin(b); t += ORDINI.intervallo) if (!oggi || t >= limite) out.push(toHHMM(t)); });
     return out;
   }
   // Perché un giorno non va bene (testo per il cliente), oppure "" se va bene
@@ -1964,9 +2145,9 @@ ${pecorino}${chili}${pepe}
     if (!dateStr) return "Scegli un giorno.";
     if (dateStr < iso(new Date())) return "Questa data è già passata.";
     const g = new Date(dateStr + "T12:00:00").getDay();
-    if (ord.modo === "asporto" && g === 6) return "Il sabato non prendiamo ordini da asporto.";
-    if (ord.modo === "asporto" && g === 0) return "L’asporto è solo dal lunedì al venerdì.";
-    if (ord.modo === "consegna" && g === 1) return "Il lunedì non facciamo consegne.";
+    if (ord.modo === "asporto" && !ORDINI.asportoAttivo) return "In questo periodo non facciamo asporto.";
+    if (ord.modo === "consegna" && !ORDINI.consegnaAttiva) return "In questo periodo non facciamo consegne.";
+    if (!(orariModo()[g] || []).length) return "Il " + GIORNI[g] + " non facciamo " + (ord.modo === "asporto" ? "asporto." : "consegne.");
     if (!oreOrdine(dateStr).length) return "Per oggi non ci sono più orari disponibili: scegli un altro giorno.";
     return "";
   }
@@ -1979,16 +2160,16 @@ ${pecorino}${chili}${pepe}
     if (m === "tavolo") return;
     const cons = m === "consegna";
     if (cons) inizializzaAutocompleteIndirizzo();
-    else if (indirizzoSelezionato) { resetIndirizzoSelezionato("Per una nuova consegna seleziona di nuovo l’indirizzo."); if (autocompleteIndirizzo) autocompleteIndirizzo.value = ""; }
+    else if (indirizzoSelezionato) { resetIndirizzoSelezionato("Per una nuova consegna seleziona di nuovo l’indirizzo."); if (autocompleteIndirizzo) { autocompleteIndirizzo.value = ""; $("#o-civico").value = ""; } viaScelta = null; }
     $("#ord-titolo").textContent = cons ? "Consegna a domicilio" : "Asporto";
-    $("#ord-sotto").textContent = cons ? "Scegli le pizze, te le portiamo a casa calde." : "Ordini adesso, passi a ritirare all’ora che scegli.";
+    $("#ord-sotto").textContent = cons ? "Scegli le pizze, le portiamo noi." : "Ordina ora, ritiri all’ora scelta.";
     $("#o-ora-tipo").textContent = cons ? "(consegna)" : "(ritiro)";
     $("#ord-avviso").innerHTML = cons
-      ? "<strong>Consegna a domicilio</strong>Consegniamo a " + ORDINI.comuni.join(", ") + ": dal martedì alla domenica a cena, sabato e domenica anche a pranzo. Minimo d’ordine " + euro(ORDINI.minimoConsegna) + ", consegna " + euro(ORDINI.costoConsegna) + "."
-      : "<strong>Asporto: dal lunedì al venerdì, 18:30 – 22:30</strong>Il sabato non prendiamo ordini da asporto.";
+      ? "<strong>Consegna " + euro(ORDINI.costoConsegna) + " · minimo " + euro(ORDINI.minimoConsegna) + "</strong>Entro " + String(ORDINI.raggioKm).replace(".", ",") + " km · " + riassuntoOrari(ORARI_CONSEGNA)
+      : "<strong>Asporto</strong>" + riassuntoOrari(ORARI_ASPORTO) + ".";
     $("#ord-avviso").classList.remove("no");
     document.querySelectorAll(".solo-consegna").forEach(el => { el.hidden = !cons; });
-    document.querySelectorAll(".pag-s").forEach((el, i) => { el.textContent = cons ? (i ? "Paghi al rider con il POS" : "Paghi al rider, meglio con l’importo giusto") : (i ? "Paghi in cassa al ritiro" : "Paghi in cassa al ritiro"); });
+    document.querySelectorAll(".pag-s").forEach((el, i) => { el.textContent = cons ? "Al rider" : "In cassa"; });
     giorniOrdine();
     if (oData.value && giornoNo(oData.value)) oData.value = "";
     oData.dispatchEvent(new Event("change"));
@@ -2016,19 +2197,54 @@ ${pecorino}${chili}${pepe}
     document.querySelectorAll("#o-giorni .chip").forEach(c => c.classList.toggle("on", c.dataset.value === oData.value));
     const no = oData.value ? giornoNo(oData.value) : "";
     errO("o-data", no);
-    $("#ord-avviso").classList.toggle("no", !!no && /sabato/.test(no));
+    $("#ord-avviso").classList.toggle("no", !!no && /non facciamo/.test(no));
     if (!oData.value || no) { oOre.innerHTML = '<p class="slots-empty">' + (no || "Scegli prima il giorno.") + "</p>"; return; }
     oOre.innerHTML = oreOrdine(oData.value).map(t => '<label><input type="radio" name="o-ora" value="' + t + '"><span>' + t + "</span></label>").join("");
+    ordiniPieni(oData.value);
   });
+  // Orari già pieni per il limite "massimo ordini per fascia" (foglio Parametri): li disattivo
+  function applicaOrdiniPieni(giorno) {
+    const d = DISP[giorno], pieni = d && d.ordini ? d.ordini[ord.modo] || [] : [];
+    oOre.querySelectorAll('input[name="o-ora"]').forEach(i => {
+      const p = pieni.indexOf(i.value) >= 0;
+      i.disabled = p; if (p && i.checked) i.checked = false;
+      i.parentElement.title = p ? "Orario al completo" : "";
+      i.parentElement.classList.toggle("piena", p);
+    });
+  }
+  function ordiniPieni(giorno) {
+    if (!giorno || ord.modo === "tavolo" || !CONFIG.webhook) return;
+    const nota = DISP[giorno];
+    if (nota) applicaOrdiniPieni(giorno);
+    if (nota && Date.now() - nota.t < 60000) return;
+    caricaDisp([giorno]).then(() => { if (oData.value === giorno) applicaOrdiniPieni(giorno); }).catch(() => {});
+  }
+  // "mar–ven 19:00–22:30 · sab e dom 12:30–14:30, 19:00–22:30"
+  function riassuntoOrari(orari) {
+    const corto = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"];
+    const g = gruppiGiorni(orari).filter(x => x.t !== "Chiuso");
+    if (!g.length) return "al momento non attivo";
+    return g.map(x => (x.giorni.length === 1 ? corto[x.giorni[0]] : x.giorni.length === 2 ? corto[x.giorni[0]] + " e " + corto[x.giorni[1]] : corto[x.giorni[0]] + "–" + corto[x.giorni[x.giorni.length - 1]]) + " " + x.t.replace(/ – /g, "–").replace(/ · /g, ", ")).join(" · ");
+  }
   oOre.addEventListener("change", () => errO("o-ora", ""));
 
   // Menu da ordinare con le quantità
-  (function menuOrdine() {
-    const gruppi = [...new Set(LISTINO.map(p => p.g))];
-    $("#menu-ord").innerHTML = gruppi.map(g => "<div><h4>" + g + "</h4>" + LISTINO.filter(p => p.g === g).map(p =>
+  function menuOrdine() {
+    const voci = LISTINO.filter(p => !p.sala), gruppi = [...new Set(voci.map(p => p.g))];
+    $("#menu-ord").innerHTML = gruppi.map(g => "<div><h4>" + g + "</h4>" + voci.filter(p => p.g === g).map(p =>
       '<div class="riga-ord" data-id="' + p.id + '"><span class="np">' + p.nome + (p.sub ? "<small>" + p.sub + "</small>" : "") + '</span><span class="pr">' + euro(p.prezzo) + "</span>" +
       '<span class="qta"><button type="button" data-d="-1" aria-label="Togli ' + p.nome + '" disabled>−</button><output>0</output><button type="button" data-d="1" aria-label="Aggiungi ' + p.nome + '">+</button></span></div>').join("") + "</div>").join("");
-  })();
+    rimettiQuantita("#menu-ord", ord.qta);
+  }
+  // Dopo aver ridisegnato un menù rimetto le quantità già scelte (e tolgo quelle di voci sparite)
+  function rimettiQuantita(sel, qta) {
+    Object.keys(qta).forEach(id => {
+      const riga = document.querySelector(sel + ' .riga-ord[data-id="' + id + '"]');
+      if (!riga) { delete qta[id]; return; }
+      riga.querySelector("output").textContent = qta[id]; riga.querySelector('[data-d="-1"]').disabled = false; riga.classList.add("scelta");
+    });
+  }
+  menuOrdine();
   $("#menu-ord").addEventListener("click", e => {
     const b = e.target.closest("button[data-d]"); if (!b) return;
     const riga = b.closest(".riga-ord"), id = riga.dataset.id;
@@ -2071,7 +2287,15 @@ ${pecorino}${chili}${pepe}
     else if (cons && c.sub < ORDINI.minimoConsegna) e.push(["o-righe", "Per la consegna il minimo è " + euro(ORDINI.minimoConsegna) + ".", $("#menu-ord")]);
     if (!$("#o-nome").value.trim()) e.push(["o-nome", "Scrivi il tuo nome.", $("#o-nome")]);
     if (!/^[0-9+\s]{8,16}$/.test($("#o-tel").value.trim())) e.push(["o-tel", "Controlla il numero: solo cifre, spazi e +.", $("#o-tel")]);
-    if (cons && (!indirizzoSelezionato || $("#o-via").value.trim().length < 5)) e.push(["o-via", "Scegli un indirizzo completo dalla lista dei suggerimenti.", $("#o-via-autocomplete")]);
+    if (cons) provaViaScritta(); // ha scritto la via senza toccare il suggerimento
+    if (cons && !viaScelta) e.push(["o-via", "Non trovo questa via a Ciampino: scegline una dall’elenco dei suggerimenti.", $("#o-via-autocomplete")]);
+    else if (cons && (!indirizzoSelezionato || $("#o-via").value.trim().length < 5)) e.push(["o-via", "Manca il numero civico.", $("#o-civico")]);
+    else if (cons && viaScelta.km > ORDINI.raggioKm) e.push(["o-via", "Questa via è fuori dalla nostra zona di consegna (" + ORDINI.raggioKm + " km).", $("#o-via-autocomplete")]);
+    // l'orario scelto potrebbe essere diventato troppo vicino mentre il cliente sceglieva le pizze
+    if (!no && ora && oreOrdine(oData.value).indexOf(ora) < 0) {
+      e.push(["o-ora", "Quell’orario ormai è troppo vicino: scegline uno più avanti.", oOre]);
+      oData.dispatchEvent(new Event("change"));
+    }
     return { e, c, ora };
   }
   function mostraO(titolo, testo) {
@@ -2099,6 +2323,7 @@ ${pecorino}${chili}${pepe}
       indirizzo_verificato: cons && !!indirizzoSelezionato, place_id: cons && indirizzoSelezionato ? indirizzoSelezionato.placeId : "",
       latitudine: cons && indirizzoSelezionato ? indirizzoSelezionato.latitudine : "", longitudine: cons && indirizzoSelezionato ? indirizzoSelezionato.longitudine : "",
       localita: cons && indirizzoSelezionato ? indirizzoSelezionato.localita : "", numero_civico: cons && indirizzoSelezionato ? indirizzoSelezionato.numeroCivico : "",
+      via: cons && viaScelta ? viaScelta.via : "", km_locale: cons && viaScelta ? viaScelta.km : "",
       righe: c.righe.map(r => ({ id: r.id, qta: r.qta })), totale_visto: c.tot,
       pagamento: (formOrd.querySelector('input[name="pag"]:checked') || {}).value || "contanti",
       note: $("#o-note").value.trim(), sito_web: $("#o-sito_web").value
@@ -2115,7 +2340,7 @@ ${pecorino}${chili}${pepe}
       ord.qta = {}; formOrd.reset(); compilaCliente();
       document.querySelectorAll(".riga-ord").forEach(rg => { rg.classList.remove("scelta"); rg.querySelector("output").textContent = 0; rg.querySelector('[data-d="-1"]').disabled = true; });
       $("#o-comune").value = ORDINI.comuni[0];
-      resetIndirizzoSelezionato(); if (autocompleteIndirizzo) autocompleteIndirizzo.value = "";
+      resetIndirizzoSelezionato(); if (autocompleteIndirizzo) { autocompleteIndirizzo.value = ""; $("#o-civico").value = ""; } viaScelta = null;
       oData.dispatchEvent(new Event("change")); aggiornaCarrello();
     } catch (err) {
       console.warn("Ordine non inviato:", err && err.message);
@@ -2130,16 +2355,18 @@ ${pecorino}${chili}${pepe}
   function testoPre() {
     const ids = Object.keys(PRE);
     if (!ids.length) return "Nessuno (facoltativo)";
-    const tot = ids.reduce((s, id) => s + LISTINO.find(p => p.id === id).prezzo * PRE[id], 0);
+    const tot = ids.reduce((s, id) => s + ((LISTINO.find(p => p.id === id) || {}).prezzo || 0) * PRE[id], 0);
     const pezzi = ids.reduce((s, id) => s + PRE[id], 0);
     return pezzi + (pezzi === 1 ? " piatto" : " piatti") + " · " + euro(tot);
   }
-  (function menuPre() {
+  function menuPre() {
     const gruppi = [...new Set(LISTINO.map(p => p.g))];
     $("#menu-pre").innerHTML = gruppi.map(g => "<div><h4>" + g + "</h4>" + LISTINO.filter(p => p.g === g).map(p =>
       '<div class="riga-ord" data-id="' + p.id + '"><span class="np">' + p.nome + '</span><span class="pr">' + euro(p.prezzo) + "</span>" +
       '<span class="qta"><button type="button" data-d="-1" aria-label="Togli ' + p.nome + '" disabled>−</button><output>0</output><button type="button" data-d="1" aria-label="Aggiungi ' + p.nome + '">+</button></span></div>').join("") + "</div>").join("");
-  })();
+    rimettiQuantita("#menu-pre", PRE);
+  }
+  menuPre();
   $("#menu-pre").addEventListener("click", e => {
     const b = e.target.closest("button[data-d]"); if (!b) return;
     const riga = b.closest(".riga-ord"), id = riga.dataset.id;
@@ -2187,6 +2414,120 @@ ${pecorino}${chili}${pepe}
     aggiorna();
   }
   compilaCliente();
+
+  /* =========================================================
+     PARAMETRI E MENÙ DAL FOGLIO (Parametri e Menù dello sheet)
+     All'apertura chiedo al gestionale orari, consegne, limiti e menù. Uso subito l'ultima copia
+     salvata su questo telefono, poi quella appena arrivata. Se il gestionale non risponde
+     restano i valori scritti qui sopra.
+     ========================================================= */
+  const CHIAVE_CONFIG = "aleTriciana.config";
+  function rimpiazza(obj, nuovo) { Object.keys(obj).forEach(k => delete obj[k]); Object.assign(obj, nuovo); }
+  function applicaConfig(c) {
+    if (!c || !c.ok) return;
+    if (c.nome) CONFIG.nomeLocale = c.nome;
+    if (c.telefono) CONFIG.telefonoLocale = c.telefono;
+    const p = c.prenotazioni || {}, o = c.ordini || {};
+    if (p.max_persone) CONFIG.maxPersone = p.max_persone;
+    CONFIG.prenotazioniAttive = p.attive !== false;
+    if (p.intervallo) CONFIG.intervallo = p.intervallo;
+    if (p.ultima != null) CONFIG.ultima = p.ultima;
+    if (p.anticipo != null) CONFIG.anticipo = p.anticipo;
+    if (c.orari) { rimpiazza(ORARI, c.orari.sala); rimpiazza(ORARI_ASPORTO, c.orari.asporto); rimpiazza(ORARI_CONSEGNA, c.orari.consegna); }
+    const vecchioLocale = ORDINI.locale.lat + "," + ORDINI.locale.lng;
+    Object.assign(ORDINI, {
+      costoConsegna: o.costo != null ? o.costo : ORDINI.costoConsegna, minimoConsegna: o.minimo != null ? o.minimo : ORDINI.minimoConsegna,
+      comuni: o.comuni && o.comuni.length ? o.comuni : ORDINI.comuni, raggioKm: o.raggio || ORDINI.raggioKm,
+      anticipoConsegna: o.anticipo_consegna != null ? o.anticipo_consegna : ORDINI.anticipoConsegna,
+      anticipoAsporto: o.anticipo_asporto != null ? o.anticipo_asporto : ORDINI.anticipoAsporto,
+      intervallo: o.intervallo || ORDINI.intervallo, consegnaAttiva: o.consegna !== false, asportoAttivo: o.asporto !== false,
+      locale: c.locale && isFinite(c.locale.lat) ? c.locale : ORDINI.locale
+    });
+    // la pizzeria si è spostata: ricalcolo i km delle vie già caricate
+    if (STRADE && ORDINI.locale.lat + "," + ORDINI.locale.lng !== vecchioLocale) {
+      STRADE.forEach(v => { v.km = Math.round(kmTra(ORDINI.locale.lat, ORDINI.locale.lng, v.lat, v.lng) * 100) / 100; });
+      if (viaScelta) aggiornaIndirizzo();
+    }
+    if (Array.isArray(c.menu) && c.menu.length) {
+      const nuovo = [];
+      c.menu.forEach(cat => cat.voci.forEach(v => nuovo.push({ id: v.id, g: cat.categoria, nome: v.nome, sub: v.nota || "", prezzo: Number(v.prezzo), sala: !!v.sala })));
+      LISTINO.splice(0, LISTINO.length, ...nuovo);
+      disegnaMenuSito(c.menu);
+      menuOrdine(); menuPre();
+      $("#pre-tot").textContent = Object.keys(PRE).length ? testoPre() : "";
+      aggiornaCarrello();
+    }
+    // testi e scelte che dipendono dai parametri
+    $("#o-comune").innerHTML = ORDINI.comuni.map(x => "<option>" + x + "</option>").join("");
+    $("#o-zona").textContent = "Consegniamo solo a " + ORDINI.comuni.join(", ") + ".";
+    const az = $("#az-asporto"); if (az) az.textContent = ORDINI.asportoAttivo ? riassuntoOrari(ORARI_ASPORTO) : "Al momento non attivo";
+    disegnaOrariSito();
+    const scelto = dataEl.value; quickDates(); if (scelto) { dataEl.value = scelto; dataEl.dispatchEvent(new Event("change")); }
+    setPersone(state.persone);
+    if (ord.modo !== "tavolo") setModo(ord.modo); else giorniOrdine();
+  }
+  // Menù della pagina: ricostruito dal foglio. Le quattro romane tengono descrizione e disegno della pizza.
+  function disegnaMenuSito(menu) {
+    const grid = document.querySelector("#menu .menu-grid"); if (!grid) return;
+    const statici = {};
+    grid.querySelectorAll(".item").forEach(it => { const n = it.querySelector(".item-row span"); if (n) statici[normVia(n.textContent)] = it; });
+    const blocco = cat => {
+      const romane = /romane/i.test(cat.categoria);
+      return '<div class="menu-block' + (romane ? " romane" : "") + ' reveal in"><h3>' + esc(cat.categoria) + "</h3>" + cat.voci.map(v => {
+        const vecchio = statici[normVia(v.nome)], riga = '<div class="item-row"><span>' + esc(v.nome) + '</span><span class="dots"></span><span class="price">' + euro(Number(v.prezzo)) + "</span></div>";
+        if (vecchio) { // stessa voce di prima: tengo descrizione, id e disegno, cambio nome e prezzo
+          const c = vecchio.cloneNode(true); c.querySelector(".item-row").outerHTML = riga; c.removeAttribute("data-pronta");
+          if (v.nota && !c.querySelector("p")) c.insertAdjacentHTML("beforeend", "<p>" + esc(v.nota) + "</p>");
+          return c.outerHTML;
+        }
+        return '<div class="item">' + riga + (v.nota ? "<p>" + esc(v.nota) + "</p>" : "") + "</div>";
+      }).join("") + "</div>";
+    };
+    // due colonne con circa lo stesso numero di righe
+    const tot = menu.reduce((s, c) => s + c.voci.length + 2, 0); let acc = 0; const sx = [], dx = [];
+    menu.forEach(c => { (acc < tot / 2 ? sx : dx).push(c); acc += c.voci.length + 2; });
+    grid.innerHTML = "<div>" + sx.map(blocco).join("") + "</div><div>" + dx.map(blocco).join("") + "</div>";
+    if (typeof attivaPizze === "function") attivaPizze();
+  }
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  try { applicaConfig(JSON.parse(localStorage.getItem(CHIAVE_CONFIG) || "null")); } catch (e) {}
+  if (CONFIG.webhook) leggiGestionale({ action: "config" }).then(c => {
+    if (!c || !c.ok) return;
+    let prima = ""; try { prima = localStorage.getItem(CHIAVE_CONFIG) || ""; } catch (e) {}
+    const ora = JSON.stringify(c);
+    if (ora === prima) return; // niente di nuovo rispetto a quello già applicato
+    try { localStorage.setItem(CHIAVE_CONFIG, ora); } catch (e) {}
+    applicaConfig(c);
+  }).catch(err => console.warn("Parametri non letti, uso quelli di partenza:", err && err.message));
+
+  /* ---------- Aiuti di sola visualizzazione: non cambiano calcoli, controlli né invii ---------- */
+  (function () {
+    // 1) barra verso il minimo per la consegna (il minimo è quello vero di ORDINI)
+    const min = $("#c-min");
+    if (min) {
+      const barra = document.createElement("div"); barra.className = "minimo-barra"; barra.innerHTML = "<span></span>"; min.after(barra);
+      const aggiornaBarra = () => {
+        const sub = parseFloat(($("#c-sub").textContent || "0").replace(/[^\d,]/g, "").replace(",", ".")) || 0;
+        barra.hidden = ord.modo !== "consegna";
+        barra.firstChild.style.width = Math.min(100, sub / ORDINI.minimoConsegna * 100) + "%";
+        barra.classList.toggle("ok", sub >= ORDINI.minimoConsegna);
+      };
+      new MutationObserver(aggiornaBarra).observe($("#c-sub"), { childList: true, characterData: true, subtree: true });
+      document.querySelectorAll(".modi button, [data-vai]").forEach(b => b.addEventListener("click", () => setTimeout(aggiornaBarra, 0)));
+      aggiornaBarra();
+    }
+    // 2) torta da fuori: il totale del servizio per il numero di persone scelto
+    const voceTorta = [...document.querySelectorAll('.xp[data-for="torta"] li')].find(li => /1,50/.test(li.textContent));
+    if (voceTorta) {
+      const tot = document.createElement("span"); tot.className = "torta-tot"; voceTorta.appendChild(tot);
+      const aggiornaTorta = () => { const n = state.persone || 1; tot.textContent = "Per " + n + (n === 1 ? " persona: " : " persone: ") + (1.5 * n).toFixed(2).replace(".", ",") + " €"; };
+      new MutationObserver(aggiornaTorta).observe($("#persone-out"), { childList: true, characterData: true, subtree: true });
+      aggiornaTorta();
+    }
+    // 3) se si consegna in un solo comune, il campo "Comune" è inutile: lo nascondo (il valore resta)
+    const sel = $("#o-comune");
+    if (sel && sel.options.length <= 1) sel.closest(".field").classList.add("nascosto");
+  })();
 </script>
 </body>
 </html>
