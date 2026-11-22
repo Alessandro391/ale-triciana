@@ -786,6 +786,34 @@
   .torta-tot { display: block; font-weight: 700; color: var(--warn); }
   /* Il pulsante finale resta sempre a portata di dito mentre si compila, con il totale scritto sopra */
   #invia, #o-invia { position: sticky; bottom: calc(.7rem + env(safe-area-inset-bottom, 0px)); z-index: 6; box-shadow: 0 12px 28px -10px rgba(179,38,30,.7); }
+
+  /* =====================================================================
+     TOUR VIRTUALE: schermo intero, comandi grandi, una frase per volta
+     ===================================================================== */
+  .tour-link { display: inline-flex; align-items: center; gap: .5rem; margin-top: 1rem; padding: .7rem 1.1rem; border-radius: 999px; cursor: pointer;
+    border: 1.5px solid rgba(255,247,236,.55); background: rgba(255,255,255,.12); color: var(--hero-text); font: 600 1rem/1 var(--font-body); }
+  .tour-link:hover { background: rgba(255,255,255,.22); }
+  .tour-link.chiaro { margin: .2rem 0 1.1rem; border-color: var(--line); background: var(--surface); color: var(--text); }
+  .tour { position: fixed; inset: 0; z-index: 100; background: #1B130E; color: #FFF7EC; }
+  .tour-tela, .tour-tela canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .tour-barra { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: .6rem; padding: calc(.8rem + env(safe-area-inset-top, 0px)) 1rem .8rem;
+    background: linear-gradient(rgba(27,19,14,.85), rgba(27,19,14,0)); }
+  .tour-barra button { border: 0; border-radius: 999px; padding: .8rem 1.2rem; min-height: 3rem; font: 700 1rem/1 var(--font-body); cursor: pointer;
+    background: rgba(255,247,236,.16); color: #FFF7EC; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .tour-barra button:hover { background: rgba(255,247,236,.28); }
+  .tour-barra #tour-chiudi { margin-left: auto; background: #FFF7EC; color: #2A2421; }
+  .tour-linea { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: rgba(255,247,236,.15); }
+  .tour-linea span { display: block; height: 100%; width: 0; background: var(--tuorlo); }
+  .tour-didascalia { position: absolute; left: 50%; bottom: calc(1.6rem + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); max-width: calc(100% - 2rem);
+    padding: .8rem 1.3rem; border-radius: 16px; background: rgba(27,19,14,.72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    font: 400 clamp(1.3rem, 4.5vw, 2rem)/1.15 var(--font-display); text-align: center; transition: opacity .3s; }
+  .tour-didascalia.vuota { opacity: 0; }
+  .tour-carica { position: absolute; inset: 0; display: grid; place-items: center; padding: 2rem; text-align: center; font-size: 1.15rem; }
+  .tour-fine { position: absolute; left: 50%; bottom: calc(5.6rem + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); display: grid; gap: .7rem; padding: 1.4rem; border-radius: 22px; width: min(340px, calc(100% - 2rem));
+    background: rgba(27,19,14,.82); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); text-align: center; }
+  .tour-fine .btn { text-align: center; }
+  .tour-fine button { border: 1.5px solid rgba(255,247,236,.5); background: transparent; color: #FFF7EC; border-radius: 999px; padding: .9rem; font: 600 1rem var(--font-body); cursor: pointer; }
+  @media (max-width: 600px) { .tour-barra button { padding: .75rem .95rem; font-size: .95rem; } }
 </style>
 </head>
 <body>
@@ -812,6 +840,7 @@
           <a class="az" href="#prenota" data-vai="consegna"><span class="ico" aria-hidden="true">🛵</span><span><b>Consegna a casa</b><small>Consegna 2,50 € · minimo 15 €</small></span></a>
           <a class="az" href="#prenota" data-vai="asporto"><span class="ico" aria-hidden="true">🥡</span><span><b>Asporto</b><small id="az-asporto">Dal lunedì al venerdì</small></span></a>
         </div>
+        <button type="button" class="tour-link" data-tour>▶ Guarda la sala in 3D</button>
         <p class="hero-hint" id="hero-hint">Passa sopra una pizza per vedere cosa c’è sopra. Cliccala per trovarla nel menu.</p>
       </div>
 
@@ -935,6 +964,7 @@
       <div class="how reveal">
         <h2>Prenota un tavolo</h2>
         <p>Un minuto, senza telefonare.</p>
+        <button type="button" class="tour-link chiaro" data-tour>▶ Guarda la sala</button>
 
         <aside class="summary" aria-label="Riepilogo della prenotazione">
           <div class="sum-head"><span>La tua richiesta</span><span id="sum-pct">0%</span></div>
@@ -1102,6 +1132,21 @@
 </footer>
 
 <div class="float-pizza" id="float-pizza" aria-hidden="true"></div>
+<div class="tour" id="tour" hidden role="dialog" aria-modal="true" aria-label="Tour virtuale della sala">
+  <div class="tour-tela" id="tour-tela"></div>
+  <div class="tour-barra">
+    <button type="button" id="tour-play" aria-pressed="true">❚❚ Pausa</button>
+    <button type="button" id="tour-ricomincia">↺ Da capo</button>
+    <button type="button" id="tour-chiudi">✕ Chiudi</button>
+  </div>
+  <div class="tour-didascalia vuota" id="tour-didascalia" aria-live="polite"></div>
+  <div class="tour-fine" id="tour-fine" hidden>
+    <a class="btn btn-main" id="tour-prenota" href="#prenota" data-vai="tavolo">Prenota un tavolo</a>
+    <button type="button" id="tour-rivedi">Guarda di nuovo</button>
+  </div>
+  <div class="tour-carica" id="tour-carica">Preparo la sala…</div>
+  <div class="tour-linea"><span id="tour-avanzamento"></span></div>
+</div>
 <div class="mobile-bar" id="mobile-bar"><a class="btn btn-main" href="#prenota">Prenota o ordina</a></div>
 
 <!-- Pannelli delle richieste speciali (mostrati solo se selezionate) -->
@@ -2527,6 +2572,302 @@ ${pecorino}${chili}${pepe}
     // 3) se si consegna in un solo comune, il campo "Comune" è inutile: lo nascondo (il valore resta)
     const sel = $("#o-comune");
     if (sel && sel.options.length <= 1) sel.closest(".field").classList.add("nascosto");
+  })();
+  /* =========================================================
+     TOUR VIRTUALE DELLA SALA
+     Un modellino 3D semplice (si vede che è 3D, apposta) con una passeggiata automatica di circa 45 secondi.
+     La disposizione dei tavoli è la stessa della pianta del gestionale. three.js si scarica solo
+     quando qualcuno apre il tour, così il sito resta veloce. Non tocca prenotazioni né ordini.
+     ========================================================= */
+  (function () {
+    const THREE_URL = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+    const tour = document.getElementById("tour");
+    if (!tour) return;
+    const tela = document.getElementById("tour-tela"), didascalia = document.getElementById("tour-didascalia");
+    const pPlay = document.getElementById("tour-play"), pRic = document.getElementById("tour-ricomincia"), barra = document.getElementById("tour-avanzamento");
+    const fine = document.getElementById("tour-fine"), carica = document.getElementById("tour-carica");
+    const ridotto = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let T = null, renderer, scene, camera, orologio = 0, ultimo = 0, inPausa = false, raf = 0, cameriere = null, numeri = [], aperto = false, soffitto = [];
+
+    // ---- La sala in centimetri, come nel gestionale: x verso destra, y dall'ingresso verso il fondo ----
+    function tavoli() {
+      const t = []; let id = 1;
+      const add = (x, y, w, h, forma, posti) => t.push({ id: id++, x, y, w, h, forma, posti });
+      [160, 335, 510, 685, 860].forEach((y, r) => {
+        add(90, y, 70, 70, "rett", 2);
+        if (r === 4) { add(290, y - 15, 100, 100, "tondo", 4); add(510, y - 15, 100, 100, "tondo", 4); }
+        else { add(280, y, 120, 70, "rett", 4); add(500, y, 120, 70, "rett", 4); }
+      });
+      const X = [880, 1100, 1320, 1540, 1760];
+      X.forEach(x => add(x, 80, 120, 70, "rett", 4));
+      X.forEach(x => add(x, 255, 120, 70, "rett", 4));
+      [[880, 180, 6], [1110, 120, 4], [1320, 180, 6], [1550, 120, 4], [1760, 180, 6]].forEach(a => add(a[0], 430, a[1], a[1] > 120 ? 80 : 70, "rett", a[2]));
+      X.forEach((x, i) => { if (i === 1 || i === 3) add(x + 10, 590, 100, 100, "tondo", 4); else add(x, 605, 120, 70, "rett", 4); });
+      [[880, 220, 90, 8], [1175, 70, 70, 2], [1320, 220, 90, 8], [1615, 70, 70, 2], [1760, 120, 70, 4]].forEach(a => add(a[0], 780, a[1], a[2], "rett", a[3]));
+      return t;
+    }
+    const M = 0.01, H = 3.2;
+    const W = (x, y, h) => new T.Vector3(x * M - 10, (h || 0) * M, 5.5 - y * M);   // dal centimetro della pianta al mondo 3D
+
+    // ---- Materiali e piccole texture disegnate al volo (niente immagini da scaricare) ----
+    const mat = {}, colore = c => mat[c] || (mat[c] = new T.MeshLambertMaterial({ color: c }));
+    function texturaCanvas(w, h, disegna, rx, ry) {
+      const c = document.createElement("canvas"); c.width = w; c.height = h; disegna(c.getContext("2d"), w, h);
+      const tx = new T.CanvasTexture(c); tx.wrapS = tx.wrapT = T.RepeatWrapping; tx.repeat.set(rx || 1, ry || 1); return tx;
+    }
+    const piastrelleMuro = (lung) => new T.MeshLambertMaterial({ map: texturaCanvas(128, 128, (g, w, h) => {
+      g.fillStyle = "#D9C4A0"; g.fillRect(0, 0, w, h);
+      g.save(); g.translate(w / 2, h / 2); g.rotate(Math.PI / 4); g.fillStyle = "#B79466"; g.fillRect(-26, -26, 52, 52); g.restore();
+      g.strokeStyle = "rgba(90,60,30,.35)"; g.lineWidth = 2; g.strokeRect(0, 0, w, h);
+    }, Math.max(1, lung / 0.45), 3) });
+    let pavimento, legno, legnoScuro, intonaco; // creati in costruisci(), quando three.js è caricato
+
+    function box(w, h, d, m, x, y, z, ry) {
+      const o = new T.Mesh(new T.BoxGeometry(w, h, d), m); o.position.set(x, y, z); if (ry) o.rotation.y = ry; scene.add(o); return o;
+    }
+    // Muro dritto tra due punti della pianta, con la parte bassa a piastrelle (come nel locale di riferimento)
+    function muro(x1, y1, x2, y2, spessore) {
+      const a = W(x1, y1), b = W(x2, y2), lung = a.distanceTo(b), mx = (a.x + b.x) / 2, mz = (a.z + b.z) / 2, ang = Math.atan2(b.z - a.z, b.x - a.x);
+      const s = spessore || 0.16;
+      box(lung, 1.35, s, piastrelleMuro(lung), mx, 0.675, mz, -ang);
+      box(lung, H - 1.35, s, intonaco, mx, 1.35 + (H - 1.35) / 2, mz, -ang);
+    }
+    // Etichetta che resta sempre rivolta verso chi guarda
+    function etichetta(testo, pos, scala, sfondo) {
+      const c = document.createElement("canvas"), g = c.getContext("2d"); c.width = 512; c.height = 128;
+      g.font = "600 56px 'Work Sans', system-ui, sans-serif"; const lw = g.measureText(testo).width + 70;
+      g.fillStyle = sfondo || "rgba(42,36,33,.86)"; const x0 = (512 - lw) / 2;
+      g.beginPath(); g.moveTo(x0 + 40, 18); g.arcTo(x0 + lw, 18, x0 + lw, 110, 40); g.arcTo(x0 + lw, 110, x0, 110, 40); g.arcTo(x0, 110, x0, 18, 40); g.arcTo(x0, 18, x0 + lw, 18, 40); g.fill();
+      g.fillStyle = "#FFF7EC"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(testo, 256, 66);
+      const sp = new T.Sprite(new T.SpriteMaterial({ map: new T.CanvasTexture(c), transparent: true }));
+      sp.position.copy(pos); const k = scala || 1; sp.scale.set(2 * k, 0.5 * k, 1); sp.renderOrder = 10; scene.add(sp); return sp;
+    }
+
+    function costruisci() {
+      pavimento = new T.MeshLambertMaterial({ map: texturaCanvas(128, 128, (g, w, h) => {
+        g.fillStyle = "#DDD0BA"; g.fillRect(0, 0, w, h); g.strokeStyle = "#BFAF95"; g.lineWidth = 3; g.strokeRect(0, 0, w, h);
+      }, 50, 28) });
+      legno = colore("#6E4A2C"); legnoScuro = colore("#4E3320"); intonaco = colore("#DCC6A4");
+      scene = new T.Scene();
+      scene.background = new T.Color("#2A1E16");
+      scene.fog = new T.Fog("#2A1E16", 14, 30);
+      scene.add(new T.HemisphereLight("#FFE2B8", "#4A3220", 0.72));
+      scene.add(new T.AmbientLight("#FFE9CF", 0.12));
+      const sole = new T.DirectionalLight("#FFE6C2", 0.35); sole.position.set(-4, 10, 6); scene.add(sole);
+      [[300, 400], [1100, 300], [1600, 700], [600, 900]].forEach(p => { const l = new T.PointLight("#FFB86B", 0.45, 8); l.position.copy(W(p[0], p[1], 280)); scene.add(l); });
+
+      // pavimento, soffitto e travi di legno
+      const pav = new T.Mesh(new T.PlaneGeometry(20, 11), pavimento); pav.rotation.x = -Math.PI / 2; scene.add(pav);
+      const sof = new T.Mesh(new T.PlaneGeometry(20, 11), colore("#7A5638")); sof.rotation.x = Math.PI / 2; sof.position.y = H; scene.add(sof); soffitto.push(sof);
+      for (let x = 60; x < 2000; x += 150) soffitto.push(box(0.22, 0.26, 11, legnoScuro, x * M - 10, H - 0.13, 0));
+      soffitto.push(box(20, 0.3, 0.3, legnoScuro, 0, H - 0.15, 0));
+
+      // muri: perimetro, ingresso (300-450), muro tra le sale con l'arco (470-600)
+      muro(0, 0, 300, 0); muro(450, 0, 2000, 0); muro(0, 1100, 2000, 1100); muro(0, 0, 0, 1100); muro(2000, 0, 2000, 1100);
+      muro(760, 0, 760, 470, 0.22); muro(760, 600, 760, 1100, 0.22);
+      const arco = W(760, 535); box(0.24, H - 2.35, 1.3, intonaco, arco.x, 2.35 + (H - 2.35) / 2, arco.z);
+      // tende rosse dell'arco, aperte ai lati
+      for (let i = 0; i < 5; i++) {
+        [-1, 1].forEach(lato => box(0.06 + (i % 2) * 0.04, 2.3, 0.1, colore("#8E1A16"), arco.x + 0.08, 1.17, arco.z + lato * (0.62 - i * 0.06)));
+      }
+      // porta d'ingresso: telaio e zerbino
+      const ing = W(375, 0); box(1.6, 0.12, 0.2, legno, ing.x, 2.3, ing.z); box(0.1, 2.3, 0.2, legno, ing.x - 0.78, 1.15, ing.z); box(0.1, 2.3, 0.2, legno, ing.x + 0.78, 1.15, ing.z);
+      box(1.3, 0.02, 0.7, colore("#5A2E22"), ing.x, 0.01, ing.z - 0.5);
+      etichetta("Ingresso", W(375, -20, 260), 0.9);
+
+      // finestre sul lato destro e sul fronte della sala grande
+      for (let y = 120; y < 900; y += 190) { const p = W(2000, y); box(0.06, 0.8, 1.5, colore("#9FB2B8"), p.x - 0.1, 1.85, p.z); box(0.08, 0.9, 1.6, legnoScuro, p.x - 0.07, 1.85, p.z); }
+      for (let x = 950; x < 1950; x += 260) { const p = W(x, 0); box(1.6, 0.8, 0.06, colore("#9FB2B8"), p.x, 1.85, p.z - 0.1); }
+
+      // cassa e bancone vicino all'ingresso, con mattoncini e bottiglie sugli scaffali
+      const cassa = W(645, 58);
+      box(1.7, 1.05, 0.75, colore("#9A4E38"), cassa.x, 0.525, cassa.z);
+      box(1.82, 0.06, 0.85, legno, cassa.x, 1.08, cassa.z);
+      box(0.32, 0.22, 0.26, colore("#2B2B2B"), cassa.x - 0.45, 1.22, cassa.z);
+      for (let s = 0; s < 3; s++) {
+        const y = 1.6 + s * 0.42; box(1.8, 0.04, 0.24, legno, cassa.x, y, 5.5 - 0.14);
+        for (let b = 0; b < 12; b++) {
+          const bo = new T.Mesh(new T.CylinderGeometry(0.035, 0.04, 0.26, 8), colore(["#2E5E3A", "#6B3A1E", "#203B2E", "#8A6A2A"][(b + s) % 4]));
+          bo.position.set(cassa.x - 0.8 + b * 0.145, y + 0.15, 5.5 - 0.14); scene.add(bo);
+        }
+      }
+      // lampade colorate sopra il bancone
+      ["#4FB3A9", "#E89A3C", "#C2412F"].forEach((c, i) => {
+        const l = new T.Mesh(new T.SphereGeometry(0.14, 14, 10), new T.MeshBasicMaterial({ color: c })); l.position.set(cassa.x - 0.55 + i * 0.55, 2.35, cassa.z); scene.add(l);
+        box(0.01, H - 2.45, 0.01, colore("#222"), l.position.x, 2.45 + (H - 2.45) / 2, cassa.z);
+        const p = new T.PointLight(c, 0.35, 3.5); p.position.copy(l.position); scene.add(p);
+      });
+      etichetta("Cassa", W(645, 58, 255), 0.75);
+
+      // in fondo alla sala grande: bagni, porta della cucina, forno
+      muro(1110, 960, 1180, 960); muro(1260, 960, 1330, 960); muro(1110, 960, 1110, 1100); muro(1330, 960, 1330, 1100);
+      const wc = W(1220, 960); box(0.8, 0.25, 0.16, intonaco, wc.x, 2.2, wc.z);
+      const portaWc = box(0.06, 2.05, 0.78, colore("#7E5A3A"), wc.x - 0.38, 1.03, wc.z - 0.36); portaWc.rotation.y = 0.6;
+      etichetta("Bagni", W(1220, 950, 250), 0.8, "rgba(46,90,140,.9)");
+      const cu = W(1485, 1100); box(0.92, 2.1, 0.06, colore("#7A4E2D"), cu.x, 1.05, cu.z + 0.1);
+      const oblo = new T.Mesh(new T.CircleGeometry(0.15, 20), colore("#BFD3D9")); oblo.position.set(cu.x, 1.5, cu.z + 0.14); scene.add(oblo);
+      etichetta("Cucina", W(1485, 1090, 250), 0.8, "rgba(179,38,30,.92)");
+      const fo = W(1770, 1025);
+      box(4.2, 1.0, 1.3, colore("#8C4A34"), fo.x, 0.5, fo.z); box(4.3, 0.06, 1.4, colore("#D8CDBB"), fo.x, 1.03, fo.z);
+      const cupola = new T.Mesh(new T.SphereGeometry(0.85, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), colore("#A8452B")); cupola.position.set(fo.x + 1.2, 1.06, fo.z); scene.add(cupola);
+      const bocca = new T.Mesh(new T.CircleGeometry(0.3, 16, 0, Math.PI), new T.MeshBasicMaterial({ color: "#FF9A3D" })); bocca.position.set(fo.x + 1.2, 1.07, fo.z + 0.84); scene.add(bocca);
+      etichetta("Forno", W(1770, 1000, 250), 0.75);
+
+      // bandierine colorate appese, come nel locale di riferimento
+      const colori = ["#F2C230", "#2E8B4F", "#C8302A", "#F4F1EA", "#2B55A8"];
+      [[60, 960, 700, 960], [800, 1040, 1950, 1040], [800, 380, 1950, 380]].forEach(f => {
+        const a = W(f[0], f[1], 285), b = W(f[2], f[3], 285), n = Math.round(a.distanceTo(b) / 0.42);
+        for (let i = 0; i < n; i++) {
+          const u = (i + 0.5) / n, p = a.clone().lerp(b, u); p.y -= Math.sin(u * Math.PI) * 0.35;
+          const fl = new T.Mesh(new T.PlaneGeometry(0.3, 0.36), new T.MeshLambertMaterial({ color: colori[i % 5], side: T.DoubleSide }));
+          fl.position.copy(p); fl.position.y -= 0.18; fl.rotation.y = -Math.atan2(b.z - a.z, b.x - a.x); scene.add(fl);
+        }
+      });
+
+      // tavoli, tovaglie e sedie (le sedie sono "istanze": tante uguali, leggere da disegnare)
+      const sedie = [];
+      tavoli().forEach(t => {
+        const c = W(t.x + t.w / 2, t.y + t.h / 2), w = t.w * M, d = t.h * M;
+        if (t.forma === "tondo") {
+          const r = w / 2;
+          const tov = new T.Mesh(new T.CylinderGeometry(r + 0.06, r + 0.1, 0.28, 24), colore("#EFE4CC")); tov.position.set(c.x, 0.64, c.z); scene.add(tov);
+          const top = new T.Mesh(new T.CylinderGeometry(r * 0.78, r * 0.78, 0.012, 4), colore("#3E302A")); top.position.set(c.x, 0.785, c.z); top.rotation.y = Math.PI / 4; scene.add(top);
+          box(0.08, 0.5, 0.08, legnoScuro, c.x, 0.25, c.z);
+          for (let i = 0; i < t.posti; i++) { const a = i / t.posti * Math.PI * 2 + Math.PI / 4; sedie.push([c.x + Math.cos(a) * (r + 0.32), c.z + Math.sin(a) * (r + 0.32), -a - Math.PI / 2]); }
+        } else {
+          box(w + 0.1, 0.28, d + 0.1, colore("#EFE4CC"), c.x, 0.64, c.z);
+          const lato = Math.min(w, d) * 0.92; box(lato, 0.012, lato, colore("#3E302A"), c.x, 0.785, c.z, Math.PI / 4);
+          [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(s => box(0.05, 0.5, 0.05, legnoScuro, c.x + s[0] * (w / 2 - 0.08), 0.25, c.z + s[1] * (d / 2 - 0.08)));
+          const perLato = Math.ceil(t.posti / 2);
+          for (let i = 0; i < t.posti; i++) {
+            const sopra = i < perLato, k = sopra ? i : i - perLato, n = sopra ? perLato : t.posti - perLato;
+            const px = c.x - w / 2 + w * (k + 0.5) / n, pz = c.z + (sopra ? -(d / 2 + 0.3) : d / 2 + 0.3);
+            sedie.push([px, pz, sopra ? Math.PI : 0]);
+            box(0.2, 0.004, 0.14, colore("#FBF8F1"), px, 0.795, c.z + (sopra ? -(d / 2 - 0.12) : d / 2 - 0.12)); // tovagliolo
+          }
+        }
+        const n = etichetta(String(t.id), new T.Vector3(c.x, 1.4, c.z), 0.95); n.material.opacity = 0; numeri.push(n);
+      });
+      const nero = colore("#1E1B19"), seduta = colore("#C9A66B");
+      const im = (geo, m, n) => { const o = new T.InstancedMesh(geo, m, n); scene.add(o); return o; };
+      const sSed = im(new T.BoxGeometry(0.42, 0.05, 0.42), seduta, sedie.length), sSch = im(new T.BoxGeometry(0.42, 0.42, 0.04), nero, sedie.length), sGam = im(new T.BoxGeometry(0.035, 0.45, 0.035), nero, sedie.length * 4);
+      const m4 = new T.Matrix4(), q = new T.Quaternion(), e = new T.Euler(), uno = new T.Vector3(1, 1, 1);
+      sedie.forEach((s, i) => {
+        e.set(0, s[2], 0); q.setFromEuler(e);
+        const dentro = (dx, dy, dz) => new T.Vector3(dx, dy, dz).applyQuaternion(q).add(new T.Vector3(s[0], 0, s[1]));
+        sSed.setMatrixAt(i, m4.compose(dentro(0, 0.46, 0), q, uno));
+        sSch.setMatrixAt(i, m4.compose(dentro(0, 0.7, 0.2), q, uno));
+        [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach((g, j) => sGam.setMatrixAt(i * 4 + j, m4.compose(dentro(g[0] * 0.18, 0.225, g[1] * 0.18), q, uno)));
+      });
+      sSed.instanceMatrix.needsUpdate = sSch.instanceMatrix.needsUpdate = sGam.instanceMatrix.needsUpdate = true;
+
+      // qualche cliente seduto: corpo e testa, colori tenui
+      const vestiti = ["#5F7A8C", "#9C5B4C", "#6D8A5E", "#B08A4F", "#7A6A8C", "#4E5D6C", "#A35F7A"];
+      const tutti = sedie;
+      [2, 3, 9, 14, 30, 31, 44, 45, 46, 47, 60, 61, 62, 63, 64, 90, 91, 92, 93, 94, 95, 120, 121, 133, 134, 135].forEach((i, k) => {
+        const s = tutti[i]; if (!s) return;
+        const g = new T.Group(); g.position.set(s[0], 0, s[1]); g.rotation.y = s[2];
+        const corpo = new T.Mesh(new T.CylinderGeometry(0.15, 0.19, 0.55, 8), colore(vestiti[k % vestiti.length])); corpo.position.set(0, 0.78, 0.04); g.add(corpo);
+        const testa = new T.Mesh(new T.SphereGeometry(0.11, 10, 8), colore(["#E8C2A0", "#C9946C", "#8D5B3E"][k % 3])); testa.position.set(0, 1.17, 0.02); g.add(testa);
+        scene.add(g);
+      });
+      // il cameriere che cammina nel corridoio della sala grande
+      cameriere = new T.Group();
+      const cc = new T.Mesh(new T.CylinderGeometry(0.17, 0.2, 1.1, 8), colore("#222")); cc.position.y = 0.95; cameriere.add(cc);
+      const gr = new T.Mesh(new T.BoxGeometry(0.34, 0.6, 0.02), colore("#F4F1EA")); gr.position.set(0, 0.85, 0.19); cameriere.add(gr);
+      const ct = new T.Mesh(new T.SphereGeometry(0.12, 10, 8), colore("#D9AD86")); ct.position.y = 1.62; cameriere.add(ct);
+      const vassoio = new T.Mesh(new T.CylinderGeometry(0.2, 0.2, 0.02, 16), colore("#BFBFBF")); vassoio.position.set(0.28, 1.25, 0.1); cameriere.add(vassoio);
+      scene.add(cameriere);
+
+      etichetta("Sala piccola", W(380, 1000, 250), 0.9);
+      etichetta("Sala grande", W(1400, 160, 260), 0.9);
+    }
+
+    // ---- La passeggiata: punti in centimetri della pianta, altezza degli occhi, cosa guardare e la frase ----
+    const TAPPE = [
+      [0, [430, -260, 165], [430, 300, 140], "Benvenuti da Ale Triciana"],
+      [4, [430, 60, 165], [450, 500, 130], ""],
+      [8, [450, 280, 160], [640, 40, 150], "La cassa, appena entrati"],
+      [12, [450, 430, 160], [140, 900, 100], "La sala piccola: 15 tavoli"],
+      [16, [690, 455, 160], [780, 540, 150], ""],
+      [20, [830, 548, 160], [1500, 480, 110], "La sala grande: 25 tavoli"],
+      [24, [1282, 560, 160], [1260, 900, 120], ""],
+      [28, [1282, 740, 160], [1220, 965, 140], "I bagni"],
+      [32, [1452, 905, 160], [1640, 1070, 140], "La cucina e il forno"],
+      [36, [1955, 545, 175], [1100, 420, 80], "Tavoli da 2, 4, 6 e 8 persone"],
+      [41, [1000, -420, 1180], [1000, 560, 0], "Scegli il tuo tavolo e prenota"]
+    ];
+    const DURATA = 44;
+    const cr = (a, b, c, d, u) => { const u2 = u * u, u3 = u2 * u; return 0.5 * ((2 * b) + (-a + c) * u + (2 * a - 5 * b + 4 * c - d) * u2 + (-a + 3 * b - 3 * c + d) * u3); };
+    function puntoA(t, quale) {
+      const n = TAPPE.length; let i = 0;
+      while (i < n - 2 && t > TAPPE[i + 1][0]) i++;
+      const t0 = TAPPE[i][0], t1 = TAPPE[i + 1][0], u0 = Math.min(1, Math.max(0, (t - t0) / (t1 - t0))), u = u0 * u0 * (3 - 2 * u0);
+      const P = k => TAPPE[Math.max(0, Math.min(n - 1, k))][quale];
+      const v = [0, 1, 2].map(j => cr(P(i - 1)[j], P(i)[j], P(i + 1)[j], P(i + 2)[j], u));
+      return W(v[0], v[1], v[2]);
+    }
+    function frase(t) { let f = ""; TAPPE.forEach(k => { if (t >= k[0] - 1.8 && k[3]) f = k[3]; }); return f; }
+
+    function disegna(ora) {
+      raf = requestAnimationFrame(disegna);
+      const dt = Math.min(0.05, (ora - (ultimo || ora)) / 1000); ultimo = ora;
+      if (!inPausa) orologio = Math.min(DURATA, orologio + dt);
+      const t = orologio;
+      camera.position.copy(puntoA(t, 1)); camera.lookAt(puntoA(t, 2));
+      const dallAlto = camera.position.y > H + 0.3; soffitto.forEach(m => { m.visible = !dallAlto; }); // dall'alto si toglie il soffitto, come in un plastico
+      // cameriere avanti e indietro nel corridoio
+      const c = (ora / 1000) * 0.18 % 2, u = c < 1 ? c : 2 - c, p = W(900 + u * 1000, 378);
+      cameriere.position.set(p.x, 0, p.z); cameriere.rotation.y = c < 1 ? Math.PI / 2 : -Math.PI / 2;
+      // numeri dei tavoli: compaiono nella vista dall'alto, come nella pianta del gestionale
+      const alfa = Math.max(0, Math.min(1, (t - 38) / 3)); numeri.forEach(n => { n.material.opacity = alfa; });
+      const f = frase(t); if (didascalia.textContent !== f) { didascalia.textContent = f; didascalia.classList.toggle("vuota", !f); }
+      barra.style.width = (t / DURATA * 100).toFixed(1) + "%";
+      const finito = t >= DURATA; fine.hidden = !finito;
+      if (finito && !inPausa) { inPausa = true; aggiornaPlay(); }
+      renderer.render(scene, camera);
+    }
+    function misura() {
+      if (!renderer) return;
+      const r = tela.getBoundingClientRect(); renderer.setSize(r.width, r.height, false);
+      camera.aspect = r.width / Math.max(1, r.height); camera.fov = r.width < r.height ? 75 : 60; camera.updateProjectionMatrix();
+    }
+    function aggiornaPlay() { pPlay.textContent = inPausa ? "▶ Riprendi" : "❚❚ Pausa"; pPlay.setAttribute("aria-pressed", String(!inPausa)); }
+    function caricaThree() {
+      if (window.THREE) return Promise.resolve(window.THREE);
+      return new Promise((ok, no) => { const s = document.createElement("script"); s.src = THREE_URL; s.onload = () => ok(window.THREE); s.onerror = () => no(new Error("three.js non caricato")); document.head.appendChild(s); });
+    }
+    async function apri() {
+      aperto = true; tour.hidden = false; document.body.style.overflow = "hidden"; carica.hidden = false; fine.hidden = true;
+      try {
+        T = await caricaThree();
+        if (!renderer) {
+          renderer = new T.WebGLRenderer({ antialias: true });
+          renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+          tela.appendChild(renderer.domElement);
+          camera = new T.PerspectiveCamera(60, 1, 0.05, 80);
+          costruisci();
+          addEventListener("resize", misura);
+        }
+        carica.hidden = true; misura();
+        orologio = ridotto ? DURATA : 0; inPausa = false; ultimo = 0; aggiornaPlay();
+        if (!aperto) return;
+        cancelAnimationFrame(raf); raf = requestAnimationFrame(disegna);
+        pPlay.focus();
+      } catch (e) {
+        carica.textContent = "Il tour non si apre su questo dispositivo. Puoi comunque prenotare.";
+      }
+    }
+    function chiudi() {
+      aperto = false; tour.hidden = true; document.body.style.overflow = ""; cancelAnimationFrame(raf);
+    }
+    document.querySelectorAll("[data-tour]").forEach(b => b.addEventListener("click", apri));
+    document.getElementById("tour-chiudi").addEventListener("click", chiudi);
+    pPlay.addEventListener("click", () => { if (orologio >= DURATA) orologio = 0; inPausa = !inPausa; aggiornaPlay(); });
+    pRic.addEventListener("click", () => { orologio = 0; inPausa = false; fine.hidden = true; aggiornaPlay(); });
+    document.getElementById("tour-rivedi").addEventListener("click", () => { orologio = 0; inPausa = false; fine.hidden = true; aggiornaPlay(); });
+    document.getElementById("tour-prenota").addEventListener("click", chiudi);
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && aperto) chiudi(); });
   })();
 </script>
 </body>
